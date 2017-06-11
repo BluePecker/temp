@@ -5,8 +5,9 @@ var mongoose = require("mongoose");
 var message_schema = require("./schema/message");
 var message_model = mongoose.model("message", message_schema);
 
-var server = http.createServer(function (request, response) {});
+var server = http.createServer(function (request, response) {
 
+});
 server.listen(6010);
 
 var clients = [];
