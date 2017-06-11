@@ -155,7 +155,7 @@ chat_io.on("connection", function (connection) {
              *      type    : "object"
              *  }
              */
-            case "list":
+            case "history":
                 if (typeof message.content == "object" && undefined != message.content.from) {
                     var query = {
                         $or: [
@@ -175,9 +175,22 @@ chat_io.on("connection", function (connection) {
                         };
                     }
                     var limit = message.content.limit == undefined || message.content.limit <= 0 ? 15 : message.content.limit;
-                    message_model.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (messages) {
+                    message_model.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (err, docs) {
+                        if (err != null) {
+                            connection.json.send({
+                                logic_id: "history_error",
+                                username: "系统消息",
+                                from    : "system",
+                                target  : message.from,
+                                read    : false,
+                                time    : (new Date()).getTime(),
+                                content : "查询历史消息出错",
+                                type    : "text"
+                            });
+                            return false;
+                        }
                         var list = [];
-                        messages.forEach(function (msg) {
+                        docs.forEach(function (msg) {
                             list.push({
                                 _id     : msg._id,
                                 username: msg.username,
@@ -189,7 +202,7 @@ chat_io.on("connection", function (connection) {
                             });
                         });
                         connection.json.send({
-                            logic_id: "history",
+                            logic_id: "history_success",
                             username: "系统消息",
                             from    : "system",
                             target  : message.from,

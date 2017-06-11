@@ -10,7 +10,7 @@ socket.on('connect', function () {
     });
 
     socket.emit('message', {
-        logic_id: "list",
+        logic_id: "history",
         username: "舒超",
         from    : "586b033825942d0c496b8152",
         target  : "system",
