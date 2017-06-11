@@ -13,12 +13,8 @@ server.listen(6010);
 var clients = [];
 var chat_io = require("socket.io").listen(server);
 
-try {
-    // 连接数据库
-    mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
-} catch (e) {
-    console.log(e);
-}
+// 连接数据库
+mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 
 chat_io.on("connection", function (connection) {
     console.log((new Date()) + ' connection from origin ' + connection.id + '.');
@@ -54,27 +50,37 @@ chat_io.on("connection", function (connection) {
         switch (message.logic_id) {
             // 聊天
             case "chat":
-                message.time = (new Date()).getTime();
                 // 目标用户在线
                 if (undefined != clients[message.target]) {
+                    message.time = (new Date()).getTime();
                     clients[message.target].json.send(message);
-                    message.from = mongoose.Types.ObjectId(message.from);
-                    message.read = true;
-                    message.target = mongoose.Types.ObjectId(message.target);
-                    (new message_model(message)).save(function (err) {
-                        if (err != null) {
-                            console.log("保存消息失败: " + err);
+                    connection.json.send({
+                        "type"   : "system",
+                        "status" : 200,
+                        "message": {
+                            "time"   : (new Date()).getTime(),
+                            "read"   : false,
+                            "content": "消息发送成功"
                         }
                     });
-                } else { // 目标用户离线
-                    message.from = mongoose.Types.ObjectId(message.from);
-                    message.target = mongoose.Types.ObjectId(message.target);
-                    (new message_model(message)).save(function (err) {
-                        if (err != null) {
-                            console.log("保存消息失败: " + err);
+                } else {
+                    connection.json.send({
+                        "type"   : "system",
+                        "status" : 201,
+                        "message": {
+                            "time"   : (new Date()).getTime(),
+                            "read"   : false,
+                            "content": "目标用户离线，消息缓存成功"
                         }
                     });
                 }
+                message.from = mongoose.Types.ObjectId(message.from);
+                message.target = mongoose.Types.ObjectId(message.target);
+                (new message_model(message)).save(function (err) {
+                    if (err != null) {
+                        console.log("保存消息失败: " + err);
+                    }
+                });
                 break;
             // 登录
             case "login":
