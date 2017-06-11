@@ -57,7 +57,17 @@ chat_io.on("connection", function (connection) {
         console.log((new Date()) + " message: " + JSON.stringify(message));
 
         switch (message.logic_id) {
-            // 聊天
+            /**
+             * 聊天
+             *  {
+             *      logic_id: "chat",
+             *      username: "舒超",
+             *      from    : "586b033825942d0c496b8152",
+             *      target  : "586b06fe25942d0c496b81cc",
+             *      content : "消息内容",
+             *      type    : "text"
+             *  }
+             */
             case "chat":
                 // 目标用户在线
                 message.read = false;
@@ -105,39 +115,139 @@ chat_io.on("connection", function (connection) {
                     }
                 });
                 break;
-            // 登录
+            /**
+             *  登录
+             *  {
+             *      logic_id: "login",
+             *      username: "舒超",
+             *      from    : "586b033825942d0c496b8152",
+             *      target  : "system",
+             *      content : "用户登录",
+             *      type    : "text"
+             *  }
+             */
             case "login":
-                if (message.from != undefined) {
-                    clients[message.from] = connection;
-                    connection.from = message.from;
-                    connection.json.send({
-                        logic_id: "login_success",
-                        username: "系统消息",
-                        from    : "system",
-                        target  : message.from,
-                        read    : false,
-                        time    : (new Date()).getTime(),
-                        content : "登录成功",
-                        type    : "text"
-                    });
-                } else {
-                    connection.json.send({
-                        logic_id: "login_error",
-                        username: "系统消息",
-                        from    : "system",
-                        target  : "",
-                        read    : false,
-                        time    : (new Date()).getTime(),
-                        content : "登录失败",
-                        type    : "text"
+                clients[message.from] = connection;
+                connection.from = message.from;
+                connection.json.send({
+                    logic_id: "login_success",
+                    username: "系统消息",
+                    from    : "system",
+                    target  : message.from,
+                    read    : false,
+                    time    : (new Date()).getTime(),
+                    content : "登录成功",
+                    type    : "text"
+                });
+                break;
+            /**
+             *  消息列表
+             *  {
+             *      logic_id: "list",
+             *      username: "舒超",
+             *      from    : "586b033825942d0c496b8152",
+             *      target  : "system",
+             *      content : {
+             *          message_id: 593d5522d86b3d1016d52b36,
+             *          limit     : 15,
+             *          from      : 586b06fe25942d0c496b81cc
+             *      },
+             *      type    : "object"
+             *  }
+             */
+            case "list":
+                if (typeof message.content == "object" && undefined != message.content.from) {
+                    var query = {
+                        $or: [
+                            {
+                                from  : mongoose.Types.ObjectId(message.from),
+                                target: mongoose.Types.ObjectId(message.content.from)
+                            }, {
+                                from  : mongoose.Types.ObjectId(message.content.from),
+                                target: mongoose.Types.ObjectId(message.from)
+                            }
+                        ]
+                    };
+
+                    if (undefined != message.content.message_id && message.content.message_id != null) {
+                        query._id = {
+                            $lt: mongoose.Types.ObjectId(message.content.message_id)
+                        };
+                    }
+                    var limit = message.content.limit == undefined || message.content.limit <= 0 ? 15 : message.content.limit;
+                    message_model.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (messages) {
+                        var list = [];
+                        messages.forEach(function (msg) {
+                            list.push({
+                                _id     : msg._id,
+                                username: msg.username,
+                                from    : msg.from,
+                                target  : msg.target,
+                                content : msg.content,
+                                type    : msg.type,
+                                time    : (new Date(msg.created)).getTime()
+                            });
+                        });
+                        connection.json.send({
+                            logic_id: "history",
+                            username: "系统消息",
+                            from    : "system",
+                            target  : message.from,
+                            read    : false,
+                            time    : (new Date()).getTime(),
+                            content : list,
+                            type    : "array"
+                        });
                     });
                 }
                 break;
-            case "list":
-                // todo 拉取消息列表
-                break;
+            /**
+             *  标记已读
+             *  {
+             *      logic_id: "read",
+             *      username: "舒超",
+             *      from    : "586b033825942d0c496b8152",
+             *      target  : "system",
+             *      content : "标记已读",
+             *      type    : "text"
+             *  }
+             */
             case "read":
-                // todo 置为已读
+                message_model.update({
+                    created: {
+                        $lte: new Date()
+                    },
+                    target : mongoose.Types.ObjectId(message.from)
+                }, {
+                    read    : true,
+                    modified: new Date()
+                }, {
+                    multi: true
+                }, function (err, raw) {
+                    if (err == null) {
+                        connection.json.send({
+                            logic_id: "read_success",
+                            username: "系统消息",
+                            from    : "system",
+                            target  : message.from,
+                            read    : false,
+                            time    : (new Date()).getTime(),
+                            content : "成功将" + raw + "条消息置为已读",
+                            type    : "text"
+                        });
+                    } else {
+                        connection.json.send({
+                            logic_id: "read_error",
+                            username: "系统消息",
+                            from    : "system",
+                            target  : message.from,
+                            read    : false,
+                            time    : (new Date()).getTime(),
+                            content : "标记已读失败",
+                            type    : "text"
+                        });
+                    }
+                });
                 break;
             // 异常情况
             default:
