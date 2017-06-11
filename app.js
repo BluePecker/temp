@@ -71,26 +71,37 @@ chat_io.on("connection", function (connection) {
                         target  : message.from,
                         read    : false,
                         time    : (new Date()).getTime(),
-                        content : "消息发送成功",
-                        type    : "text"
-                    });
-                } else {
-                    connection.json.send({
-                        logic_id: "cache_success",
-                        username: "系统消息",
-                        from    : "system",
-                        target  : message.from,
-                        read    : false,
-                        time    : (new Date()).getTime(),
-                        content : "消息缓存成功",
-                        type    : "text"
+                        type    : "text",
+                        content : "消息发送成功"
                     });
                 }
                 message.from = mongoose.Types.ObjectId(message.from);
                 message.target = mongoose.Types.ObjectId(message.target);
                 (new message_model(message)).save(function (err) {
-                    if (err != null) {
-                        console.log("保存消息失败: " + err);
+                    if (err == null) {
+                        if (undefined == clients[message.target]) {
+                            connection.json.send({
+                                logic_id: "cache_success",
+                                username: "系统消息",
+                                from    : "system",
+                                target  : message.from,
+                                read    : false,
+                                time    : (new Date()).getTime(),
+                                type    : "text",
+                                content : "消息缓存成功"
+                            });
+                        }
+                    } else {
+                        connection.json.send({
+                            logic_id: "save_error",
+                            username: "系统消息",
+                            from    : "system",
+                            target  : message.from,
+                            read    : false,
+                            time    : (new Date()).getTime(),
+                            type    : "text",
+                            content : "消息保存失败"
+                        });
                     }
                 });
                 break;
