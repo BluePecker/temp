@@ -141,7 +141,7 @@ chat_io.on("connection", function (connection) {
                 });
                 break;
             /**
-             *  消息列表
+             *  历史消息列表
              *  {
              *      logic_id: "list",
              *      username: "舒超",
@@ -157,61 +157,66 @@ chat_io.on("connection", function (connection) {
              */
             case "history":
                 if (typeof message.content == "object" && undefined != message.content.from) {
-                    var query = {
-                        $or: [
-                            {
-                                from  : mongoose.Types.ObjectId(message.from),
-                                target: mongoose.Types.ObjectId(message.content.from)
-                            }, {
-                                from  : mongoose.Types.ObjectId(message.content.from),
-                                target: mongoose.Types.ObjectId(message.from)
-                            }
-                        ]
-                    };
-
-                    if (undefined != message.content.message_id && message.content.message_id != null) {
-                        query._id = {
-                            $lt: mongoose.Types.ObjectId(message.content.message_id)
+                    try {
+                        var query = {
+                            $or: [
+                                {
+                                    from  : mongoose.Types.ObjectId(message.from),
+                                    target: mongoose.Types.ObjectId(message.content.from)
+                                }, {
+                                    from  : mongoose.Types.ObjectId(message.content.from),
+                                    target: mongoose.Types.ObjectId(message.from)
+                                }
+                            ]
                         };
-                    }
-                    var limit = message.content.limit == undefined || message.content.limit <= 0 ? 15 : message.content.limit;
-                    message_model.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (err, docs) {
-                        if (err != null) {
+
+                        if (undefined != message.content.message_id && message.content.message_id != null) {
+                            query._id = {
+                                $lt: mongoose.Types.ObjectId(message.content.message_id)
+                            };
+                        }
+
+                        var limit = message.content.limit == undefined || message.content.limit <= 0 ? 15 : message.content.limit;
+                        message_model.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (err, docs) {
+                            if (err != null) {
+                                connection.json.send({
+                                    logic_id: "history_error",
+                                    username: "系统消息",
+                                    from    : "system",
+                                    target  : message.from,
+                                    read    : false,
+                                    time    : (new Date()).getTime(),
+                                    content : "查询历史消息出错",
+                                    type    : "text"
+                                });
+                                return false;
+                            }
+                            var list = [];
+                            docs.forEach(function (msg) {
+                                list.push({
+                                    _id     : msg._id,
+                                    username: msg.username,
+                                    from    : msg.from,
+                                    target  : msg.target,
+                                    content : msg.content,
+                                    type    : msg.type,
+                                    time    : (new Date(msg.created)).getTime()
+                                });
+                            });
                             connection.json.send({
-                                logic_id: "history_error",
+                                logic_id: "history_success",
                                 username: "系统消息",
                                 from    : "system",
                                 target  : message.from,
                                 read    : false,
                                 time    : (new Date()).getTime(),
-                                content : "查询历史消息出错",
-                                type    : "text"
-                            });
-                            return false;
-                        }
-                        var list = [];
-                        docs.forEach(function (msg) {
-                            list.push({
-                                _id     : msg._id,
-                                username: msg.username,
-                                from    : msg.from,
-                                target  : msg.target,
-                                content : msg.content,
-                                type    : msg.type,
-                                time    : (new Date(msg.created)).getTime()
+                                content : list,
+                                type    : "array"
                             });
                         });
-                        connection.json.send({
-                            logic_id: "history_success",
-                            username: "系统消息",
-                            from    : "system",
-                            target  : message.from,
-                            read    : false,
-                            time    : (new Date()).getTime(),
-                            content : list,
-                            type    : "array"
-                        });
-                    });
+                    } catch (err) {
+                        console.log(err);
+                    }
                 }
                 break;
             /**
@@ -226,41 +231,45 @@ chat_io.on("connection", function (connection) {
              *  }
              */
             case "read":
-                message_model.update({
-                    created: {
-                        $lte: new Date()
-                    },
-                    target : mongoose.Types.ObjectId(message.from)
-                }, {
-                    read    : true,
-                    modified: new Date()
-                }, {
-                    multi: true
-                }, function (err, raw) {
-                    if (err == null) {
-                        connection.json.send({
-                            logic_id: "read_success",
-                            username: "系统消息",
-                            from    : "system",
-                            target  : message.from,
-                            read    : false,
-                            time    : (new Date()).getTime(),
-                            content : "成功将" + raw + "条消息置为已读",
-                            type    : "text"
-                        });
-                    } else {
-                        connection.json.send({
-                            logic_id: "read_error",
-                            username: "系统消息",
-                            from    : "system",
-                            target  : message.from,
-                            read    : false,
-                            time    : (new Date()).getTime(),
-                            content : "标记已读失败",
-                            type    : "text"
-                        });
-                    }
-                });
+                try {
+                    message_model.update({
+                        created: {
+                            $lte: new Date()
+                        },
+                        target : mongoose.Types.ObjectId(message.from)
+                    }, {
+                        read    : true,
+                        modified: new Date()
+                    }, {
+                        multi: true
+                    }, function (err, raw) {
+                        if (err == null) {
+                            connection.json.send({
+                                logic_id: "read_success",
+                                username: "系统消息",
+                                from    : "system",
+                                target  : message.from,
+                                read    : false,
+                                time    : (new Date()).getTime(),
+                                content : "成功将" + raw + "条消息置为已读",
+                                type    : "text"
+                            });
+                        } else {
+                            connection.json.send({
+                                logic_id: "read_error",
+                                username: "系统消息",
+                                from    : "system",
+                                target  : message.from,
+                                read    : false,
+                                time    : (new Date()).getTime(),
+                                content : "标记已读失败",
+                                type    : "text"
+                            });
+                        }
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
                 break;
             // 异常情况
             default:
