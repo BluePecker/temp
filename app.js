@@ -58,6 +58,8 @@ chat_io.on("connection", function (connection) {
                 if (undefined != clients[message.target]) {
                     clients[message.target].json.send(message);
                 } else { // 目标用户离线
+                    message.from = mongoose.Types.ObjectId(message.from);
+                    message.target = mongoose.Types.ObjectId(message.target);
                     (new message_model(message)).save(function (err) {
                         console.log(err);
                     });
