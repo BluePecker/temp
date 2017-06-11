@@ -1,7 +1,14 @@
 var socket = require('socket.io-client')('http://127.0.0.1:6010');
 socket.on('connect', function () {
+    socket.emit('message', {
+        logic_id: "login",
+        username: "舒超",
+        from    : "586b033825942d0c496b8152",
+        target  : "system",
+        content : "用户登录",
+        type    : "text"
+    });
 
-    console.log("connect");
     socket.emit('message', {
         logic_id: "chat",
         username: "舒超",
@@ -10,10 +17,9 @@ socket.on('connect', function () {
         content : "消息内容",
         type    : "text"
     });
-
 });
 
-socket.on('event', function (data) {
+socket.on('json', function (data) {
     console.log("event" + data);
 });
 socket.on('disconnect', function () {
