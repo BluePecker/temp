@@ -215,7 +215,7 @@ chat_io.on("connection", function (connection) {
                             });
                         });
                     } catch (err) {
-                        console.log(err);
+                        console.log("查看历史消息异常: " + err);
                     }
                 }
                 break;
@@ -268,7 +268,7 @@ chat_io.on("connection", function (connection) {
                         }
                     });
                 } catch (err) {
-                    console.log(err);
+                    console.log("标记已读异常: " + err);
                 }
                 break;
             // 异常情况
