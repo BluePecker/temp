@@ -9,6 +9,10 @@ module.exports = new Schema({
     target  : Schema.ObjectId,
     content : String,
     type    : String,
+    read    : {
+        type   : Boolean,
+        default: false
+    },
     created : {
         type   : Date,
         default: Date.now
