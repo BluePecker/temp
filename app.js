@@ -57,18 +57,26 @@ chat_io.on("connection", function (connection) {
                 // 目标用户在线
                 if (undefined != clients[message.target]) {
                     clients[message.target].json.send(message);
+                    message.from = mongoose.Types.ObjectId(message.from);
+                    message.read = true;
+                    message.target = mongoose.Types.ObjectId(message.target);
+                    (new message_model(message)).save(function (err) {
+                        if (err != null) {
+                            console.log("保存消息失败: " + err);
+                        }
+                    });
                 } else { // 目标用户离线
                     message.from = mongoose.Types.ObjectId(message.from);
                     message.target = mongoose.Types.ObjectId(message.target);
                     (new message_model(message)).save(function (err) {
-                        console.log(err);
+                        if (err != null) {
+                            console.log("保存消息失败: " + err);
+                        }
                     });
                 }
                 break;
             // 登录
             case "login":
-                // TODO 取出离线消息并转发给用户
-
                 if (message.from != undefined) {
                     clients[message.from] = connection;
                     connection.from = message.from;
