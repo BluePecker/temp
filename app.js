@@ -2,27 +2,31 @@
 
 var http = require("http");
 var mongoose = require("mongoose");
-var message_schema = require("./schema/message");
-var message_model = mongoose.model("message", message_schema);
+var message_model = require("./schema/message");
 
 var server = http.createServer(function (request, response) {
 
 });
 server.listen(6010);
-
-var clients = [];
 var chat_io = require("socket.io").listen(server);
 
 // 连接数据库
 mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 
+var clients = [];
 chat_io.on("connection", function (connection) {
-    console.log((new Date()) + ' connection from origin ' + connection.id + '.');
+    console.log((new Date()) + ' connection from origin ' + connection.id);
 
     connection.json.send({
-        logic_id: "conn",
-        message : "连接成功"
+        "type"   : "system",
+        "status" : 100,
+        "message": {
+            "time"   : (new Date()).getTime(),
+            "read"   : false,
+            "content": "连接成功"
+        }
     });
+
     /**
      *  消息体格式
      *  message = {
@@ -47,10 +51,14 @@ chat_io.on("connection", function (connection) {
             });
             return false;
         }
+
+        console.log((new Date()) + " Message: " + JSON.stringify(message));
+
         switch (message.logic_id) {
             // 聊天
             case "chat":
                 // 目标用户在线
+                message.read = false;
                 if (undefined != clients[message.target]) {
                     message.time = (new Date()).getTime();
                     clients[message.target].json.send(message);

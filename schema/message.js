@@ -1,12 +1,12 @@
 "use strict";
 
-var Schema = require("mongoose").Schema;
+var mongoose = require("mongoose");
 
-module.exports = new Schema({
+module.exports = mongoose.model("message", new mongoose.Schema({
     logic_id: String,
     username: String,
-    from    : Schema.ObjectId,
-    target  : Schema.ObjectId,
+    from    : mongoose.Schema.ObjectId,
+    target  : mongoose.Schema.ObjectId,
     content : String,
     type    : String,
     read    : {
@@ -21,4 +21,4 @@ module.exports = new Schema({
         type   : Date,
         default: Date.now
     }
-});
+}));
