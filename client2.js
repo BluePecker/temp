@@ -19,9 +19,10 @@ socket.on('connect', function () {
     });
 });
 
-socket.on('event', function (data) {
-    console.log("event" + data);
+socket.on('message', function (message) {
+    console.log(JSON.stringify(message));
 });
+
 socket.on('disconnect', function () {
     console.log("disconnect");
 });
