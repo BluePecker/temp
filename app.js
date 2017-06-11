@@ -15,7 +15,7 @@ mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 
 var clients = [];
 chat_io.on("connection", function (connection) {
-    
+
     console.log((new Date()) + ' connection from origin ' + connection.id);
     connection.json.send({
         logic_id: "conn_success",
@@ -54,7 +54,7 @@ chat_io.on("connection", function (connection) {
             return false;
         }
 
-        console.log((new Date()) + " Message: " + JSON.stringify(message));
+        console.log((new Date()) + " message: " + JSON.stringify(message));
 
         switch (message.logic_id) {
             // 聊天
@@ -99,7 +99,34 @@ chat_io.on("connection", function (connection) {
                 if (message.from != undefined) {
                     clients[message.from] = connection;
                     connection.from = message.from;
+                    connection.json.send({
+                        logic_id: "login_success",
+                        username: "系统消息",
+                        from    : "system",
+                        target  : message.from,
+                        read    : false,
+                        time    : (new Date()).getTime(),
+                        content : "登录成功",
+                        type    : "text"
+                    });
+                } else {
+                    connection.json.send({
+                        logic_id: "login_error",
+                        username: "系统消息",
+                        from    : "system",
+                        target  : "",
+                        read    : false,
+                        time    : (new Date()).getTime(),
+                        content : "登录失败",
+                        type    : "text"
+                    });
                 }
+                break;
+            case "list":
+                // todo 拉取消息列表
+                break;
+            case "read":
+                // todo 置为已读
                 break;
             // 异常情况
             default:
