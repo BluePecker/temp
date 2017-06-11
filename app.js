@@ -3,7 +3,7 @@
 var http = require("http");
 var mongoose = require("mongoose");
 var message_schema = require("./schema/message");
-var message_model = mongoose.model("message_model", message_schema);
+var message_model = mongoose.model("message", message_schema);
 
 var server = http.createServer(function (request, response) {});
 
@@ -14,7 +14,7 @@ var chat_io = require("socket.io").listen(server);
 
 try {
     // 连接数据库
-    mongoose.connect("mongodb://127.0.0.1:27017/test");
+    mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 } catch (e) {
     console.log(e);
 }
