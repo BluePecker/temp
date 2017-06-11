@@ -15,16 +15,17 @@ mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 
 var clients = [];
 chat_io.on("connection", function (connection) {
+    
     console.log((new Date()) + ' connection from origin ' + connection.id);
-
     connection.json.send({
-        "type"   : "system",
-        "status" : 100,
-        "message": {
-            "time"   : (new Date()).getTime(),
-            "read"   : false,
-            "content": "连接成功"
-        }
+        logic_id: "conn_success",
+        username: "系统消息",
+        from    : "system",
+        target  : "",
+        read    : false,
+        time    : (new Date()).getTime(),
+        content : "连接成功",
+        type    : "text"
     });
 
     /**
@@ -41,13 +42,14 @@ chat_io.on("connection", function (connection) {
     connection.on("message", function (message) {
         if (!validator(message)) {
             connection.json.send({
-                "type"   : "system",
-                "status" : -4000,
-                "message": {
-                    "time"   : (new Date()).getTime(),
-                    "read"   : false,
-                    "content": "非法的数据"
-                }
+                logic_id: "msg_error",
+                username: "系统消息",
+                from    : "system",
+                target  : "",
+                read    : false,
+                time    : (new Date()).getTime(),
+                content : "消息格式错误",
+                type    : "text"
             });
             return false;
         }
@@ -63,23 +65,25 @@ chat_io.on("connection", function (connection) {
                     message.time = (new Date()).getTime();
                     clients[message.target].json.send(message);
                     connection.json.send({
-                        "type"   : "system",
-                        "status" : 200,
-                        "message": {
-                            "time"   : (new Date()).getTime(),
-                            "read"   : false,
-                            "content": "消息发送成功"
-                        }
+                        logic_id: "send_success",
+                        username: "系统消息",
+                        from    : "system",
+                        target  : message.from,
+                        read    : false,
+                        time    : (new Date()).getTime(),
+                        content : "消息发送成功",
+                        type    : "text"
                     });
                 } else {
                     connection.json.send({
-                        "type"   : "system",
-                        "status" : 201,
-                        "message": {
-                            "time"   : (new Date()).getTime(),
-                            "read"   : false,
-                            "content": "目标用户离线，消息缓存成功"
-                        }
+                        logic_id: "cache_success",
+                        username: "系统消息",
+                        from    : "system",
+                        target  : message.from,
+                        read    : false,
+                        time    : (new Date()).getTime(),
+                        content : "消息缓存成功",
+                        type    : "text"
                     });
                 }
                 message.from = mongoose.Types.ObjectId(message.from);
@@ -100,13 +104,14 @@ chat_io.on("connection", function (connection) {
             // 异常情况
             default:
                 connection.json.send({
-                    "type"   : "system",
-                    "status" : -4001,
-                    "message": {
-                        "time"   : (new Date()).getTime(),
-                        "read"   : false,
-                        "content": "非法的logic_id"
-                    }
+                    logic_id: "logic_id_error",
+                    username: "系统消息",
+                    from    : "system",
+                    target  : message.from,
+                    read    : false,
+                    time    : (new Date()).getTime(),
+                    content : "logic_id错误",
+                    type    : "text"
                 });
         }
     });
