@@ -13,7 +13,7 @@ Cache.prototype.del = function (key) {
 };
 
 Cache.prototype.all = function () {
-    console.log(global.body);
+    console.log(body);
     return global.body;
 };
 
