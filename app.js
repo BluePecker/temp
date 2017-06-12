@@ -28,17 +28,6 @@ chat_io.on("connection", function (connection) {
         type    : "text"
     });
 
-    /**
-     *  消息体格式
-     *  message = {
-     *      logic_id: "chat",
-     *      username: "舒超",
-     *      from    : from_user_id,
-     *      target  : target_user_id,
-     *      content : "消息内容",
-     *      type    : "text"
-     *  }
-     */
     connection.on("message", function (message) {
         if (!validator(message)) {
             connection.json.send({
