@@ -2,7 +2,7 @@
 
 var http = require("./http/http");
 var mongoose = require("mongoose");
-var message_model = require("./schema/message");
+var message = require("./schema/message");
 var session = require("./session/memory");
 
 var chat_io = require("socket.io").listen(http.listen(6010, function () {
@@ -26,8 +26,8 @@ chat_io.on("connection", function (connection) {
         type    : "text"
     });
 
-    connection.on("message", function (message) {
-        if (!validator(message)) {
+    connection.on("message", function (content) {
+        if (!validator(content)) {
             connection.json.send({
                 logic_id: "msg_error",
                 username: "系统消息",
@@ -41,9 +41,9 @@ chat_io.on("connection", function (connection) {
             return false;
         }
 
-        console.log((new Date()) + " message: " + JSON.stringify(message));
+        console.log((new Date()) + " message: " + JSON.stringify(content));
 
-        switch (message.logic_id) {
+        switch (content.logic_id) {
             /**
              * 聊天
              *  {
@@ -57,32 +57,32 @@ chat_io.on("connection", function (connection) {
              */
             case "chat":
                 // 目标用户在线
-                message.read = false;
-                if (session.alive(message.target)) {
-                    message.time = (new Date()).getTime();
-                    session.get(message.target).json.send(message);
+                content.read = false;
+                if (session.alive(content.target)) {
+                    content.time = (new Date()).getTime();
+                    session.get(content.target).json.send(content);
 
                     connection.json.send({
                         logic_id: "send_success",
                         username: "系统消息",
                         from    : "system",
-                        target  : message.from,
+                        target  : content.from,
                         read    : false,
                         time    : (new Date()).getTime(),
                         type    : "text",
                         content : "消息发送成功"
                     });
                 }
-                message.from = mongoose.Types.ObjectId(message.from);
-                message.target = mongoose.Types.ObjectId(message.target);
-                (new message_model(message)).save(function (err) {
+                content.from = mongoose.Types.ObjectId(content.from);
+                content.target = mongoose.Types.ObjectId(content.target);
+                (new message(content)).save(function (err) {
                     if (err == null) {
-                        if (!session.alive(message.target)) {
+                        if (!session.alive(content.target)) {
                             connection.json.send({
                                 logic_id: "cache_success",
                                 username: "系统消息",
                                 from    : "system",
-                                target  : message.from,
+                                target  : content.from,
                                 read    : false,
                                 time    : (new Date()).getTime(),
                                 type    : "text",
@@ -94,7 +94,7 @@ chat_io.on("connection", function (connection) {
                             logic_id: "save_error",
                             username: "系统消息",
                             from    : "system",
-                            target  : message.from,
+                            target  : content.from,
                             read    : false,
                             time    : (new Date()).getTime(),
                             type    : "text",
@@ -115,13 +115,13 @@ chat_io.on("connection", function (connection) {
              *  }
              */
             case "login":
-                session.add(message.from, connection);
-                connection.from = message.from;
+                session.add(content.from, connection);
+                connection.from = content.from;
                 connection.json.send({
                     logic_id: "login_success",
                     username: "系统消息",
                     from    : "system",
-                    target  : message.from,
+                    target  : content.from,
                     read    : false,
                     time    : (new Date()).getTime(),
                     content : "登录成功",
@@ -144,34 +144,34 @@ chat_io.on("connection", function (connection) {
              *  }
              */
             case "history":
-                if (typeof message.content == "object" && undefined != message.content.from) {
+                if (typeof content.content == "object" && undefined != content.content.from) {
                     try {
                         var query = {
                             $or: [
                                 {
-                                    from  : mongoose.Types.ObjectId(message.from),
-                                    target: mongoose.Types.ObjectId(message.content.from)
+                                    from  : mongoose.Types.ObjectId(content.from),
+                                    target: mongoose.Types.ObjectId(content.content.from)
                                 }, {
-                                    from  : mongoose.Types.ObjectId(message.content.from),
-                                    target: mongoose.Types.ObjectId(message.from)
+                                    from  : mongoose.Types.ObjectId(content.content.from),
+                                    target: mongoose.Types.ObjectId(content.from)
                                 }
                             ]
                         };
 
-                        if (undefined != message.content.message_id && message.content.message_id != null) {
+                        if (undefined != content.content.content_id && content.content.message_id != null) {
                             query._id = {
-                                $lt: mongoose.Types.ObjectId(message.content.message_id)
+                                $lt: mongoose.Types.ObjectId(content.content.message_id)
                             };
                         }
 
-                        var limit = message.content.limit == undefined || message.content.limit <= 0 ? 15 : message.content.limit;
-                        message_model.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (err, docs) {
+                        var limit = content.content.limit == undefined || content.content.limit <= 0 ? 15 : content.content.limit;
+                        message.find(query).limit(limit).sort("-_id").select("_id username from target content type created").exec(function (err, docs) {
                             if (err != null) {
                                 connection.json.send({
                                     logic_id: "history_error",
                                     username: "系统消息",
                                     from    : "system",
-                                    target  : message.from,
+                                    target  : content.from,
                                     read    : false,
                                     time    : (new Date()).getTime(),
                                     content : "查询历史消息出错",
@@ -195,7 +195,7 @@ chat_io.on("connection", function (connection) {
                                 logic_id: "history_success",
                                 username: "系统消息",
                                 from    : "system",
-                                target  : message.from,
+                                target  : content.from,
                                 read    : false,
                                 time    : (new Date()).getTime(),
                                 content : list,
@@ -220,11 +220,11 @@ chat_io.on("connection", function (connection) {
              */
             case "read":
                 try {
-                    message_model.update({
+                    message.update({
                         created: {
                             $lte: new Date()
                         },
-                        target : mongoose.Types.ObjectId(message.from)
+                        target : mongoose.Types.ObjectId(content.from)
                     }, {
                         read    : true,
                         modified: new Date()
@@ -236,7 +236,7 @@ chat_io.on("connection", function (connection) {
                                 logic_id: "read_success",
                                 username: "系统消息",
                                 from    : "system",
-                                target  : message.from,
+                                target  : content.from,
                                 read    : false,
                                 time    : (new Date()).getTime(),
                                 content : "成功将" + raw + "条消息置为已读",
@@ -247,7 +247,7 @@ chat_io.on("connection", function (connection) {
                                 logic_id: "read_error",
                                 username: "系统消息",
                                 from    : "system",
-                                target  : message.from,
+                                target  : content.from,
                                 read    : false,
                                 time    : (new Date()).getTime(),
                                 content : "标记已读失败",
@@ -265,7 +265,7 @@ chat_io.on("connection", function (connection) {
                     logic_id: "logic_id_error",
                     username: "系统消息",
                     from    : "system",
-                    target  : message.from,
+                    target  : content.from,
                     read    : false,
                     time    : (new Date()).getTime(),
                     content : "logic_id错误",
@@ -280,12 +280,12 @@ chat_io.on("connection", function (connection) {
     });
 });
 
-function validator(message) {
-    if ("object" != typeof message || message.logic_id == undefined) {
+function validator(content) {
+    if ("object" != typeof content || content.logic_id == undefined) {
         return false;
     }
-    if (undefined == message.from || undefined == message.target) {
+    if (undefined == content.from || undefined == content.target) {
         return false;
     }
-    return !(undefined == message.content || undefined == message.type);
+    return !(undefined == content.content || undefined == content.type);
 }
