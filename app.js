@@ -48,7 +48,7 @@ wss.on("connection", function (connection) {
         event.emit(content.logic_id, connection, content);
     });
 
-    connection.on("disconnect", function (socket) {
+    connection.on("close", function (socket) {
         console.log("关闭链接: " + socket);
         session.del(connection.name);
     });
