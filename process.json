@@ -1,2 +1,14 @@
 {
+    "apps" : [
+        {
+            "name" : "doctor-x-chat",
+            "script" : "./app.js",
+            "watch" : false,
+            "out_file" : "/data/logs/nodes/doctor-x-out.log",
+            "error_file" : "/data/logs/nodes/doctor-x-error.log",
+            "env" : {
+                "NODE_ENV" : "production"
+            }
+        }
+    ]
 }
