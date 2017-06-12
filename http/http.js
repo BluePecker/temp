@@ -3,8 +3,7 @@ var session = require("../session/memory");
 
 var http = express();
 
-http.get("/push/:user_id", function (req, res, next, id) {
-    console.log(id);
+http.get("/push", function (req, res) {
     res.send("push to one people");
 });
 
