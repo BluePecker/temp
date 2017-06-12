@@ -213,4 +213,73 @@ event.on("read", function (connection, content) {
     });
 });
 
+/**
+ *  拉取会话列表
+ *  {
+ *      logic_id: "session",
+ *      username: "舒超",
+ *      from    : "586b033825942d0c496b8152",
+ *      target  : "system",
+ *      content : "拉取会话列表",
+ *      type    : "text"
+ *  }
+ */
+event.on("session", function (connection, content) {
+    message.aggregate([
+        {
+            $match: {
+                $or: [
+                    {
+                        $from: content.from
+                    }, {
+                        $target: content.from
+                    }
+                ]
+            }
+        }, {
+            $sort: {
+                _id: -1
+            }
+        }, {
+            $group: {
+                _id    : {
+                    from  : {
+                        $first: "$from"
+                    },
+                    target: {
+                        $first: "$target"
+                    }
+                },
+                created: {
+                    $first: "$created"
+                }
+            }
+        }
+    ]).exec(function (err, docs) {
+        if (err == null) {
+            connection.send(JSON.stringify({
+                logic_id: "session_success",
+                username: "系统消息",
+                from    : "system",
+                target  : content.from,
+                read    : false,
+                time    : (new Date()).getTime(),
+                content : docs,
+                type    : "array"
+            }));
+        } else {
+            connection.send(JSON.stringify({
+                logic_id: "session_error",
+                username: "系统消息",
+                from    : "system",
+                target  : content.from,
+                read    : false,
+                time    : (new Date()).getTime(),
+                content : "拉取会话列表失败",
+                type    : "text"
+            }));
+        }
+    });
+});
+
 module.exports = event;
