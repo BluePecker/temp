@@ -23,18 +23,10 @@ http.get("/push", function (req, res) {
             content : params.content,
             type    : "text"
         };
-        if (!session.alive(params.user_id)) {
-            (new message(content)).save(function (err) {
-                if (err != null) {
-                    res.send("OK");
-                } else {
-                    res.send("NO");
-                }
-            });
-        } else {
+        if (session.alive(params.user_id)) {
             session.get(params.user_id).send(JSON.stringify(content));
-            res.send("OK");
         }
+        (new message(content)).save(function (err) {});
     } else {
         res.send("NO");
     }
