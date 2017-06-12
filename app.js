@@ -1,13 +1,15 @@
 "use strict";
 
 var http = require("./http/http");
+var event = require("./socket/event");
 var mongoose = require("mongoose");
 var message = require("./schema/message");
 var session = require("./session/memory");
 
-var chat_io = require("socket.io").listen(http.listen(6010, function () {
-
-}));
+var server = http.listen(6010, function () {
+    console.log("listening port: " + server.address().port);
+});
+var chat_io = require("socket.io").listen(server);
 
 // 连接数据库
 mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
@@ -115,18 +117,19 @@ chat_io.on("connection", function (connection) {
              *  }
              */
             case "login":
-                session.add(content.from, connection);
-                connection.from = content.from;
-                connection.json.send({
-                    logic_id: "login_success",
-                    username: "系统消息",
-                    from    : "system",
-                    target  : content.from,
-                    read    : false,
-                    time    : (new Date()).getTime(),
-                    content : "登录成功",
-                    type    : "text"
-                });
+                event.emit("login", connection, content);
+                //session.add(content.from, connection);
+                //connection.from = content.from;
+                //connection.json.send({
+                //    logic_id: "login_success",
+                //    username: "系统消息",
+                //    from    : "system",
+                //    target  : content.from,
+                //    read    : false,
+                //    time    : (new Date()).getTime(),
+                //    content : "登录成功",
+                //    type    : "text"
+                //});
                 break;
             /**
              *  历史消息列表
