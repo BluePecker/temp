@@ -13,6 +13,7 @@ Cache.prototype.del = function (key) {
 };
 
 Cache.prototype.all = function () {
+    console.log(global.session);
     return global.session;
 };
 
