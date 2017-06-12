@@ -1,5 +1,4 @@
 var session = require("../session/memory");
-var mongoose = require("mongoose");
 var message = require("../schema/message");
 var event_emitter = require("events").EventEmitter;
 
