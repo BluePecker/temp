@@ -27,6 +27,7 @@ http.get("/push", function (req, res) {
             session.get(params.user_id).send(JSON.stringify(content));
         }
         (new message(content)).save(function (err) {});
+        res.send("OK");
     } else {
         res.send("NO");
     }
