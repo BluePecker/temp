@@ -10,9 +10,11 @@ mongoose.connect("mongodb://rdoctor:362bc188@db.pro.com:27017/HuaXi");
 var server = http.listen(6010, function () {
     console.log("listening port: " + server.address().port);
 });
-var chat_io = require("socket.io").listen(server);
+//var chat_io = require("socket.io").listen(server);
+var web_socket = require('ws');
+var wss = new web_socket.Server(server);
 
-chat_io.on("connection", function (connection) {
+wss.on("connection", function (connection) {
 
     console.log((new Date()) + ' connection from origin ' + connection.id);
     connection.json.send({
