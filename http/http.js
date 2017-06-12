@@ -4,8 +4,7 @@ var session = require("../session/memory");
 var http = express();
 
 http.post("/push/one", function (req, res) {
-    session.all();
-    res.send("xxxx");
+    res.send(JSON.stringify(session.all()));
 });
 
 http.post("/push/all", function (req, res) {

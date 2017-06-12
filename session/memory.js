@@ -1,28 +1,27 @@
 function Cache() {
-    global.body = [];
+    this.body = [];
 }
 
 Cache.prototype.add = function (key, value) {
-    global.body[key] = value;
+    this.body[key] = value;
 };
 
 Cache.prototype.del = function (key) {
-    if (undefined != global.body[key]) {
-        delete global.body[key]
+    if (undefined != this.body[key]) {
+        delete this.body[key]
     }
 };
 
 Cache.prototype.all = function () {
-    console.log(body);
-    return global.body;
+    return this.body;
 };
 
 Cache.prototype.get = function (key) {
-    return this.alive(key) ? global.body[key] : null;
+    return this.alive(key) ? this.body[key] : null;
 };
 
 Cache.prototype.alive = function (key) {
-    return global.body[key] != undefined;
+    return this.body[key] != undefined;
 };
 
 module.exports = new Cache;
