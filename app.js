@@ -12,7 +12,7 @@ var server = http.listen(6010, function () {
 });
 //var chat_io = require("socket.io").listen(server);
 var web_socket = require('ws');
-var wss = new web_socket.Server(server);
+var wss = new web_socket.Server({server: server});
 
 wss.on("connection", function (connection) {
 
