@@ -1,13 +1,11 @@
 var express = require("express");
 var parser = require("body-parser");
-var form_data = require("multer");
 var message = require("../schema/message");
 var session = require("../session/memory");
 
 var http = express();
 
 http.use(parser.json());
-http.use(form_data());
 http.use(parser.urlencoded({
     extended: true
 }));
