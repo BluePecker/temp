@@ -5,14 +5,8 @@ var mongoose = require("mongoose");
 var message_model = require("./schema/message");
 var session = require("./session/memory");
 
-//var http = require("http");
-//var server = http.createServer(function (request, response) {
-//
-//});
-//server.listen(6010);
-//var chat_io = require("socket.io").listen(server);
-var chat_io = require("socket.io").listen(http.listen(6010, function (app) {
-    console.log(app);
+var chat_io = require("socket.io").listen(http.listen(6010, function () {
+
 }));
 
 // 连接数据库

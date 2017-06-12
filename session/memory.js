@@ -1,4 +1,5 @@
 function Cache() {
+    console.log("++ new cache ++");
     this.list = [];
 }
 
