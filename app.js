@@ -50,7 +50,7 @@ wss.on("connection", function (connection) {
 });
 
 function validator(content) {
-    console.log(content);
+    console.log(JSON.stringify(content));
     if ("object" != typeof content || content.logic_id == undefined) {
         return false;
     }
