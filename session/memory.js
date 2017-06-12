@@ -1,30 +1,27 @@
-var session = [];
-
 function Cache() {
-    console.log("++ new cache ++");
-    session = [];
+    global.session = [];
 }
 
 Cache.prototype.add = function (key, value) {
-    session[key] = value;
+    global.session[key] = value;
 };
 
 Cache.prototype.del = function (key) {
-    if (undefined != session[key]) {
-        delete session[key]
+    if (undefined != global.session[key]) {
+        delete global.session[key]
     }
 };
 
 Cache.prototype.all = function () {
-    return session;
+    return global.session;
 };
 
 Cache.prototype.get = function (key) {
-    return this.alive(key) ? session[key] : null;
+    return this.alive(key) ? global.session[key] : null;
 };
 
 Cache.prototype.alive = function (key) {
-    return session[key] != undefined;
+    return global.session[key] != undefined;
 };
 
 module.exports = new Cache;
