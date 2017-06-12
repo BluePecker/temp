@@ -5,13 +5,12 @@ var event = require("./socket/event");
 var mongoose = require("mongoose");
 var session = require("./session/memory");
 
+// 连接数据库
+mongoose.connect("mongodb://rdoctor:362bc188@db.pro.com:27017/HuaXi");
 var server = http.listen(6010, function () {
     console.log("listening port: " + server.address().port);
 });
 var chat_io = require("socket.io").listen(server);
-
-// 连接数据库
-mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 
 chat_io.on("connection", function (connection) {
 
