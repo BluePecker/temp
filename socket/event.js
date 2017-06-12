@@ -4,14 +4,6 @@ var message = require("../schema/message");
 var event_emitter = require("events").EventEmitter;
 
 var event = new event_emitter();
-function str_to_obj(str) {
-    try {
-        return mongoose.Types.ObjectId(str);
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
-}
 
 /**
  *  登录
@@ -68,8 +60,6 @@ event.on("chat", function (connection, content) {
             content : "消息发送成功"
         }));
     }
-    content.from = str_to_obj(content.from);
-    content.target = str_to_obj(content.target);
     (new message(content)).save(function (err) {
         if (err == null) {
             if (!session.alive(content.target)) {
@@ -119,18 +109,18 @@ event.on("history", function (connection, content) {
         var query = {
             $or: [
                 {
-                    from  : str_to_obj(content.from),
-                    target: str_to_obj(content.content.from)
+                    from  : content.from,
+                    target: content.content.from
                 }, {
-                    from  : str_to_obj(content.content.from),
-                    target: str_to_obj(content.from)
+                    from  : content.content.from,
+                    target: content.from
                 }
             ]
         };
 
         if (undefined != content.content.message_id && content.content.message_id != null) {
             query._id = {
-                $lt: str_to_obj(content.content.message_id)
+                $lt: content.content.message_id
             };
         }
 
@@ -191,7 +181,7 @@ event.on("read", function (connection, content) {
         created: {
             $lte: new Date()
         },
-        target : str_to_obj(content.from)
+        target : content.from
     }, {
         read    : true,
         modified: new Date()

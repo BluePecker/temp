@@ -5,8 +5,8 @@ var mongoose = require("mongoose");
 module.exports = mongoose.model("message", new mongoose.Schema({
     logic_id: String,
     username: String,
-    from    : mongoose.Schema.ObjectId,
-    target  : mongoose.Schema.ObjectId,
+    from    : String,
+    target  : String,
     content : String,
     type    : String,
     read    : {
