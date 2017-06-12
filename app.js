@@ -16,7 +16,7 @@ var wss = new web_socket.Server({server: server});
 wss.on("connection", function (connection) {
 
     console.log((new Date()) + ' connection from origin ' + connection.id);
-    connection.send({
+    connection.send(JSON.stringify({
         logic_id: "conn_success",
         username: "系统消息",
         from    : "system",
@@ -25,11 +25,11 @@ wss.on("connection", function (connection) {
         time    : (new Date()).getTime(),
         content : "连接成功",
         type    : "text"
-    });
+    }));
 
     connection.on("message", function (content) {
         if (!validator(content)) {
-            connection.send({
+            connection.send(JSON.stringify({
                 logic_id: "msg_error",
                 username: "系统消息",
                 from    : "system",
@@ -38,7 +38,7 @@ wss.on("connection", function (connection) {
                 time    : (new Date()).getTime(),
                 content : "消息格式错误",
                 type    : "text"
-            });
+            }));
             return false;
         }
         console.log((new Date()) + " message: " + JSON.stringify(content));
