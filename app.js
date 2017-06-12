@@ -16,7 +16,7 @@ var wss = new web_socket.Server({server: server});
 wss.on("connection", function (connection) {
 
     console.log((new Date()) + ' connection from origin ' + connection.id);
-    connection.json.send({
+    connection.send({
         logic_id: "conn_success",
         username: "系统消息",
         from    : "system",
@@ -29,7 +29,7 @@ wss.on("connection", function (connection) {
 
     connection.on("message", function (content) {
         if (!validator(content)) {
-            connection.json.send({
+            connection.send({
                 logic_id: "msg_error",
                 username: "系统消息",
                 from    : "system",
