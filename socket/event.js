@@ -102,7 +102,7 @@ event.on("chat", function (connection, content) {
 /**
  *  历史消息列表
  *  {
- *      logic_id: "list",
+ *      logic_id: "history",
  *      username: "舒超",
  *      from    : "586b033825942d0c496b8152",
  *      target  : "system",
@@ -128,7 +128,7 @@ event.on("history", function (connection, content) {
             ]
         };
 
-        if (undefined != content.content.content_id && content.content.message_id != null) {
+        if (undefined != content.content.message_id && content.content.message_id != null) {
             query._id = {
                 $lt: str_to_obj(content.content.message_id)
             };
