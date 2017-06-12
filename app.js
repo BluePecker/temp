@@ -1,15 +1,19 @@
 "use strict";
-var session = require("./session/memory");
 
-var http = require("http");
+var http = require("./http/http");
 var mongoose = require("mongoose");
 var message_model = require("./schema/message");
+var session = require("./session/memory");
 
-var server = http.createServer(function (request, response) {
-
-});
-server.listen(6010);
-var chat_io = require("socket.io").listen(server);
+//var http = require("http");
+//var server = http.createServer(function (request, response) {
+//
+//});
+//server.listen(6010);
+//var chat_io = require("socket.io").listen(server);
+var chat_io = require("socket.io").listen(http.listen(6010, function (app) {
+    console.log(app);
+}));
 
 // 连接数据库
 mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
