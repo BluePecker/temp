@@ -1,4 +1,5 @@
 "use strict";
+var session = require("./session/memory");
 
 var http = require("http");
 var mongoose = require("mongoose");
@@ -13,7 +14,6 @@ var chat_io = require("socket.io").listen(server);
 // 连接数据库
 mongoose.connect("mongodb://shadowsocks:mlgR4evB@127.0.0.1:27017/vpn");
 
-var clients = [];
 chat_io.on("connection", function (connection) {
 
     console.log((new Date()) + ' connection from origin ' + connection.id);
@@ -60,9 +60,10 @@ chat_io.on("connection", function (connection) {
             case "chat":
                 // 目标用户在线
                 message.read = false;
-                if (undefined != clients[message.target]) {
+                if (session.alive(message.target)) {
                     message.time = (new Date()).getTime();
-                    clients[message.target].json.send(message);
+                    session.get(message.target).json.send(message);
+
                     connection.json.send({
                         logic_id: "send_success",
                         username: "系统消息",
@@ -78,7 +79,7 @@ chat_io.on("connection", function (connection) {
                 message.target = mongoose.Types.ObjectId(message.target);
                 (new message_model(message)).save(function (err) {
                     if (err == null) {
-                        if (undefined == clients[message.target]) {
+                        if (!session.alive(message.target)) {
                             connection.json.send({
                                 logic_id: "cache_success",
                                 username: "系统消息",
@@ -116,7 +117,7 @@ chat_io.on("connection", function (connection) {
              *  }
              */
             case "login":
-                clients[message.from] = connection;
+                session.add(message.from, connection);
                 connection.from = message.from;
                 connection.json.send({
                     logic_id: "login_success",
@@ -277,9 +278,7 @@ chat_io.on("connection", function (connection) {
 
     connection.on("disconnect", function (socket) {
         console.log("关闭链接: " + socket);
-        if (clients[connection.from] != undefined) {
-            delete clients[connection.from];
-        }
+        session.del(connection.name);
     });
 });
 
