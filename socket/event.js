@@ -25,9 +25,9 @@ event.on("login", function (connection, content) {
         from    : "system",
         target  : content.from,
         read    : false,
-        time    : (new Date()).getTime(),
         content : "登录成功",
-        type    : "text"
+        type    : "text",
+        time    : (new Date()).getTime()
     }));
 });
 
