@@ -14,8 +14,6 @@ var web_socket = require('ws');
 var wss = new web_socket.Server({server: server});
 
 wss.on("connection", function (connection) {
-
-    console.log((new Date()) + ' connection from origin ' + connection.id);
     connection.send(JSON.stringify({
         logic_id: "conn_success",
         username: "系统消息",
@@ -52,6 +50,7 @@ wss.on("connection", function (connection) {
 });
 
 function validator(content) {
+    console.log(content);
     if ("object" != typeof content || content.logic_id == undefined) {
         return false;
     }
