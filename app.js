@@ -26,6 +26,11 @@ wss.on("connection", function (connection) {
     }));
 
     connection.on("message", function (content) {
+        try {
+            content = JSON.parse(content);
+        } catch (err) {
+            console.log(err)
+        }
         if (!validator(content)) {
             connection.send(JSON.stringify({
                 logic_id: "msg_error",
@@ -50,7 +55,6 @@ wss.on("connection", function (connection) {
 });
 
 function validator(content) {
-    console.log(JSON.stringify(content));
     if ("object" != typeof content || content.logic_id == undefined) {
         return false;
     }
