@@ -1,5 +1,5 @@
 {
     "port" : 6010,
     "db_connect" : "mongodb://rdoctor:362bc188@db.pro.com:27017/HuaXi",
-    "notice_server" : ""
+    "notice_server" : "https://doctorxapi.runningdoctor.cn/wechat/msgNotice"
 }

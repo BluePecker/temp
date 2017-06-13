@@ -75,16 +75,15 @@ event.on("chat", function (connection, content) {
                     type    : "text",
                     content : "消息缓存成功"
                 }));
-                request({
+                request.post({
                     headers: {
-                        'cache-control': 'no-cache'
+                        'content-type': 'application/json'
                     },
-                    method : 'GET',
                     url    : config.notice_server,
-                    qs     : {
-                        open_id: content.target,
+                    body   : JSON.stringify({
+                        openId : content.target,
                         content: content.content
-                    }
+                    })
                 }, function (error, response) {
                     if (error || response.statusCode !== 200) {
                         console.log('微信推送提醒失败: ' + JSON.stringify(content));
