@@ -50,6 +50,14 @@ event.on("chat", function (connection, content) {
     content.read = false;
     content.target_name = !content.target_name ? "未知" : content.target_name;
 
+    var hash = crypto.createHash('md5');
+    var str1 = content.from.substr(0, 1);
+    var str2 = content.target.substr(0, 1);
+    var temp = str1 > str2 ? content.from + content.target : content.target + content.from;
+    hash.update(temp);
+
+    content.session_id = hash.digest("hex");
+
     if (session.alive(content.target)) {
         content.time = (new Date()).getTime();
         session.get(content.target).send(JSON.stringify(content));
@@ -65,14 +73,6 @@ event.on("chat", function (connection, content) {
             content : content.content
         }));
     }
-
-    var hash = crypto.createHash('md5');
-    var str1 = content.from.substr(0, 1);
-    var str2 = content.target.substr(0, 1);
-    var temp = str1 > str2 ? content.from + content.target : content.target + content.from;
-    hash.update(temp);
-
-    content.session_id = hash.digest("hex");
 
     (new message(content)).save(function (err) {
         if (err == null) {
