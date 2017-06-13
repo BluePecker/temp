@@ -4,10 +4,11 @@ var http = require("./http/http");
 var event = require("./socket/event");
 var mongoose = require("mongoose");
 var session = require("./session/memory");
+var config = require("./library/config").load('server.json');
 
 // 连接数据库
-mongoose.connect("mongodb://rdoctor:362bc188@db.pro.com:27017/HuaXi");
-var server = http.listen(6010, function () {
+mongoose.connect(config.db_connect);
+var server = http.listen(config.port, function () {
     console.log("listening port: " + server.address().port);
 });
 var web_socket = require('ws');
