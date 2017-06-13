@@ -248,7 +248,14 @@ event.on("read", function (connection, content) {
  *  }
  */
 event.on("session", function (connection, content) {
-    var match = {};
+    var match = {
+        from  : {
+            $ne: "system"
+        },
+        target: {
+            $ne: "system"
+        }
+    };
     var chat_id = null;
 
     if (!content.content.read) {
