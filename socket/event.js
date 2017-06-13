@@ -321,7 +321,7 @@ event.on("session", function (connection, content) {
                     $first: "$username"
                 },
                 content   : {
-                    $first: "$content"
+                    $last: "$content"
                 },
                 created   : {
                     $first: "$created"
