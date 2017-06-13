@@ -266,25 +266,6 @@ event.on("session", function (connection, content) {
         }
     };
     var chat_id = null;
-
-    if (!content.content.read) {
-        match = {
-            target: content.from,
-            read  : content.content.read || false
-        };
-    } else {
-        match = {
-            $or: [
-                {
-                    from: content.from
-                }, {
-                    target: content.from,
-                    read  : true
-                }
-            ]
-        };
-    }
-
     if (undefined != content.content.session_id) {
         chat_id = content.content.session_id;
         if (chat_id != null) {
@@ -296,74 +277,169 @@ event.on("session", function (connection, content) {
         }
     }
 
-    message.aggregate([
-        {
-            $match: match
-        }, {
-            $group: {
-                _id       : "$session_id",
-                session_id: {
-                    $last: "$_id"
-                },
-                from      : {
-                    $last: "$from"
-                },
-                target    : {
-                    $last: "$target"
-                },
-                type      : {
-                    $last: "$type"
-                },
-                unread    : {
-                    $sum: 1
-                },
-                username  : {
-                    $last: "$username"
-                },
-                content   : {
-                    $last: "$content"
-                },
-                created   : {
-                    $last: "$created"
+    var group = {
+        _id       : "$session_id",
+        session_id: {
+            $last: "$_id"
+        },
+        from      : {
+            $last: "$from"
+        },
+        target    : {
+            $last: "$target"
+        },
+        type      : {
+            $last: "$type"
+        },
+        unread    : {
+            $sum: 1
+        },
+        username  : {
+            $last: "$username"
+        },
+        content   : {
+            $last: "$content"
+        },
+        created   : {
+            $last: "$created"
+        }
+    };
+
+    if (!content.content.read) {
+        match = {
+            target: content.from,
+            read  : false
+        };
+
+        message.aggregate([
+            {
+                $match: match
+            }, {
+                $group: group
+            }, {
+                $sort: {
+                    created: -1
+                }
+            }, {
+                $limit: content.content.limit || 15
+            }
+        ]).exec(function (err, docs) {
+            if (err == null) {
+                docs = JSON.parse(JSON.stringify(docs));
+                connection.send(JSON.stringify({
+                    logic_id: "session_success",
+                    username: "系统消息",
+                    from    : "system",
+                    target  : content.from,
+                    read    : false,
+                    time    : (new Date()).getTime(),
+                    content : docs.map(function (item) {
+                        content.content.read == true && (item.unread = 0);
+                        item.created = (new Date(item.created)).getTime();
+                        return item;
+                    }),
+                    type    : "array"
+                }));
+            } else {
+                connection.send(JSON.stringify({
+                    logic_id: "session_error",
+                    username: "系统消息",
+                    from    : "system",
+                    target  : content.from,
+                    read    : false,
+                    time    : (new Date()).getTime(),
+                    content : "拉取会话列表失败",
+                    type    : "text"
+                }));
+            }
+        });
+    } else {
+        message.aggregate([
+            {
+                $match: {
+                    target: content.from,
+                    read  : false
+                }
+            }, {
+                $group: {
+                    _id: "$session_id"
                 }
             }
-        }, {
-            $sort: {
-                created: -1
+        ]).exec(function (err, docs) {
+            if (err == null) {
+                docs = JSON.parse(JSON.stringify(docs));
+
+                match = {
+                    $or: [
+                        {
+                            session: {
+                                $nin: docs.map(function (item) {
+                                    return item._id;
+                                })
+                            },
+                            from   : content.from
+                        }, {
+                            target: content.from,
+                            read  : true
+                        }
+                    ]
+                };
+                message.aggregate([
+                    {
+                        $match: match
+                    }, {
+                        $group: group
+                    }, {
+                        $sort: {
+                            created: -1
+                        }
+                    }, {
+                        $limit: content.content.limit || 15
+                    }
+                ]).exec(function (err, docs) {
+                    if (err == null) {
+                        docs = JSON.parse(JSON.stringify(docs));
+                        connection.send(JSON.stringify({
+                            logic_id: "session_success",
+                            username: "系统消息",
+                            from    : "system",
+                            target  : content.from,
+                            read    : false,
+                            time    : (new Date()).getTime(),
+                            content : docs.map(function (item) {
+                                content.content.read == true && (item.unread = 0);
+                                item.created = (new Date(item.created)).getTime();
+                                return item;
+                            }),
+                            type    : "array"
+                        }));
+                    } else {
+                        connection.send(JSON.stringify({
+                            logic_id: "session_error",
+                            username: "系统消息",
+                            from    : "system",
+                            target  : content.from,
+                            read    : false,
+                            time    : (new Date()).getTime(),
+                            content : "拉取会话列表失败",
+                            type    : "text"
+                        }));
+                    }
+                });
+            } else {
+                connection.send(JSON.stringify({
+                    logic_id: "session_error",
+                    username: "系统消息",
+                    from    : "system",
+                    target  : content.from,
+                    read    : false,
+                    time    : (new Date()).getTime(),
+                    content : "拉取会话列表失败",
+                    type    : "text"
+                }));
             }
-        }, {
-            $limit: content.content.limit || 15
-        }
-    ]).exec(function (err, docs) {
-        if (err == null) {
-            docs = JSON.parse(JSON.stringify(docs));
-            connection.send(JSON.stringify({
-                logic_id: "session_success",
-                username: "系统消息",
-                from    : "system",
-                target  : content.from,
-                read    : false,
-                time    : (new Date()).getTime(),
-                content : docs.map(function (item) {
-                    content.content.read == true && (item.unread = 0);
-                    item.created = (new Date(item.created)).getTime();
-                    return item;
-                }),
-                type    : "array"
-            }));
-        } else {
-            connection.send(JSON.stringify({
-                logic_id: "session_error",
-                username: "系统消息",
-                from    : "system",
-                target  : content.from,
-                read    : false,
-                time    : (new Date()).getTime(),
-                content : "拉取会话列表失败",
-                type    : "text"
-            }));
-        }
-    });
+        });
+    }
 });
 
 module.exports = event;
