@@ -3,22 +3,23 @@
 var mongoose = require("mongoose");
 
 module.exports = mongoose.model("message", new mongoose.Schema({
-    logic_id  : String,
-    username  : String,
-    from      : String,
-    target    : String,
-    content   : String,
-    type      : String,
-    session_id: String,
-    read      : {
+    logic_id   : String,
+    username   : String,
+    from       : String,
+    target     : String,
+    target_name: String,
+    content    : String,
+    type       : String,
+    session_id : String,
+    read       : {
         type   : Boolean,
         default: false
     },
-    created   : {
+    created    : {
         type   : Date,
         default: Date.now
     },
-    modified  : {
+    modified   : {
         type   : Date,
         default: Date.now
     }

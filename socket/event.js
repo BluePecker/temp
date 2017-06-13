@@ -68,11 +68,9 @@ event.on("chat", function (connection, content) {
     var str1 = content.from.substr(0, 1);
     var str2 = content.target.substr(0, 1);
     var temp = str1 > str2 ? content.from + content.target : content.target + content.from;
-    console.log(temp);
     hash.update(temp);
 
     content.session_id = hash.digest("hex");
-    console.log(content.session_id);
 
     (new message(content)).save(function (err) {
         if (err == null) {
@@ -281,29 +279,32 @@ event.on("session", function (connection, content) {
     }
 
     var group = {
-        _id       : "$session_id",
-        session_id: {
+        _id        : "$session_id",
+        session_id : {
             $last: "$_id"
         },
-        from      : {
+        from       : {
             $last: "$from"
         },
-        target    : {
+        target     : {
             $last: "$target"
         },
-        type      : {
+        type       : {
             $last: "$type"
         },
-        unread    : {
+        unread     : {
             $sum: 1
         },
-        username  : {
+        username   : {
             $last: "$username"
         },
-        content   : {
+        target_name: {
+            $last: "$target_name"
+        },
+        content    : {
             $last: "$content"
         },
-        created   : {
+        created    : {
             $last: "$created"
         }
     };
@@ -337,6 +338,10 @@ event.on("session", function (connection, content) {
                     read    : false,
                     time    : (new Date()).getTime(),
                     content : docs.map(function (item) {
+                        item.target = content.from == item.from ? item.target : item.from;
+                        item.target_name = content.from == item.from ? item.target_name : item.username;
+                        delete item.from;
+                        delete item.username;
                         content.content.read == true && (item.unread = 0);
                         item.created = (new Date(item.created)).getTime();
                         return item;
@@ -410,6 +415,10 @@ event.on("session", function (connection, content) {
                             read    : false,
                             time    : (new Date()).getTime(),
                             content : docs.map(function (item) {
+                                item.target = content.from == item.from ? item.target : item.from;
+                                item.target_name = content.from == item.from ? item.target_name : item.username;
+                                delete item.from;
+                                delete item.username;
                                 content.content.read == true && (item.unread = 0);
                                 item.created = (new Date(item.created)).getTime();
                                 return item;
