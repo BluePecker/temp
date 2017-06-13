@@ -48,7 +48,7 @@ event.on("login", function (connection, content) {
 event.on("chat", function (connection, content) {
     // 目标用户在线
     content.read = false;
-    content.target_name = !content.target_name ? "" : "未知";
+    content.target_name = !content.target_name ? "未知" : content.target_name;
 
     if (session.alive(content.target)) {
         content.time = (new Date()).getTime();
