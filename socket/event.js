@@ -271,14 +271,23 @@ event.on("session", function (connection, content) {
             }
         }, {
             $group: {
-                _id    : {
+                _id     : {
                     from  : "$from",
                     target: "$target"
                 },
-                unread : {
+                type    : {
+                    $first: "$type"
+                },
+                unread  : {
                     $sum: 1
                 },
-                created: {
+                username: {
+                    $first: "$username"
+                },
+                content : {
+                    $first: "$content"
+                },
+                created : {
                     $first: "$created"
                 }
             }
