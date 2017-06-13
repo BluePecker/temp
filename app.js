@@ -62,5 +62,8 @@ function validator(content) {
     if (undefined == content.from || undefined == content.target) {
         return false;
     }
+    if (!content.from.length || !content.target.length) {
+        return false;
+    }
     return !(undefined == content.content || undefined == content.type);
 }
