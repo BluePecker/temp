@@ -1,3 +1,4 @@
+var mongoose = require("mongoose");
 var session = require("../session/memory");
 var message = require("../schema/message");
 var event_emitter = require("events").EventEmitter;
@@ -220,22 +221,50 @@ event.on("read", function (connection, content) {
  *      username: "舒超",
  *      from    : "586b033825942d0c496b8152",
  *      target  : "system",
- *      content : "拉取会话列表",
- *      type    : "text"
+ *      content : {
+ *          session_id: null,
+ *          limit     : 15,
+ *          read      : false
+ *      },
+ *      type    : "object"
  *  }
  */
 event.on("session", function (connection, content) {
+    var match = {};
+    var chat_id = null;
+
+    if (!content.content.read) {
+        match = {
+            target: content.from,
+            read  : content.content.read || false
+        };
+    } else {
+        match = {
+            $or: [
+                {
+                    from: content.from
+                }, {
+                    target: content.from,
+                    read  : true
+                }
+            ]
+        };
+    }
+
+    if (undefined != content.content.session_id) {
+        chat_id = content.content.session_id;
+        if (chat_id != null) {
+            try {
+                match.$gt = mongoose.Types.ObjectId(chat_id)
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
     message.aggregate([
         {
-            $match: {
-                $or: [
-                    {
-                        $from: content.from
-                    }, {
-                        $target: content.from
-                    }
-                ]
-            }
+            $match: match
         }, {
             $sort: {
                 _id: -1
@@ -243,20 +272,22 @@ event.on("session", function (connection, content) {
         }, {
             $group: {
                 _id    : {
-                    from  : {
-                        $first: "$from"
-                    },
-                    target: {
-                        $first: "$target"
-                    }
+                    from  : "$from",
+                    target: "$target"
+                },
+                unread : {
+                    $sum: 1
                 },
                 created: {
                     $first: "$created"
                 }
             }
+        }, {
+            $limit: content.content.limit || 15
         }
     ]).exec(function (err, docs) {
         if (err == null) {
+            docs = JSON.parse(JSON.stringify(docs));
             connection.send(JSON.stringify({
                 logic_id: "session_success",
                 username: "系统消息",
@@ -264,7 +295,11 @@ event.on("session", function (connection, content) {
                 target  : content.from,
                 read    : false,
                 time    : (new Date()).getTime(),
-                content : docs,
+                content : docs.map(function (item) {
+                    content.content.read == true && (item.unread = 0);
+                    item.created = (new Date(item.created)).getTime();
+                    return item;
+                }),
                 type    : "array"
             }));
         } else {
