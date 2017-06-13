@@ -377,12 +377,12 @@ event.on("session", function (connection, content) {
                 match = {
                     $or: [
                         {
-                            session: {
+                            session_id: {
                                 $nin: docs.map(function (item) {
                                     return item._id;
                                 })
                             },
-                            from   : content.from
+                            from      : content.from
                         }, {
                             target: content.from,
                             read  : true
