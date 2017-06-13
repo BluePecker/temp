@@ -181,6 +181,7 @@ event.on("read", function (connection, content) {
         created: {
             $lte: new Date()
         },
+        from   : content.target,
         target : content.from
     }, {
         read    : true,
