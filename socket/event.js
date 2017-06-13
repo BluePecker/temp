@@ -67,7 +67,9 @@ event.on("chat", function (connection, content) {
     var hash = crypto.createHash('md5');
     var str1 = content.from.substr(0, 1);
     var str2 = content.target.substr(0, 1);
-    hash.update(str1 > str2 ? content.from + content.target : content.target + content.from);
+    var temp = str1 > str2 ? content.from + content.target : content.target + content.from;
+    console.log(temp);
+    hash.update(temp);
 
     content.session_id = hash.digest("hex");
 
