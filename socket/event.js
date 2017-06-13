@@ -72,6 +72,7 @@ event.on("chat", function (connection, content) {
     hash.update(temp);
 
     content.session_id = hash.digest("hex");
+    console.log(content.session_id);
 
     (new message(content)).save(function (err) {
         if (err == null) {
