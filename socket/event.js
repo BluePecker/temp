@@ -305,6 +305,12 @@ event.on("session", function (connection, content) {
                 session_id: {
                     $first: "$_id"
                 },
+                from      : {
+                    $first: "$from"
+                },
+                target    : {
+                    $first: "$target"
+                },
                 type      : {
                     $first: "$type"
                 },
