@@ -1,4 +1,5 @@
 var mongoose = require("mongoose");
+var crypto = require('crypto');
 var session = require("../session/memory");
 var message = require("../schema/message");
 var config = require("../library/config").load("server.json");
@@ -62,6 +63,14 @@ event.on("chat", function (connection, content) {
             content : content.content
         }));
     }
+
+    var hash = crypto.createHash('md5');
+    var str1 = content.from.substr(0, 1);
+    var str2 = content.target.substr(0, 1);
+    hash.update(str1 > str2 ? content.from + content.target : content.target + content.from);
+
+    content.session_id = hash.digest("hex");
+
     (new message(content)).save(function (err) {
         if (err == null) {
             if (!session.alive(content.target)) {
@@ -292,32 +301,29 @@ event.on("session", function (connection, content) {
             $match: match
         }, {
             $group: {
-                _id       : {
-                    from  : "$from",
-                    target: "$target"
-                },
+                _id       : "$session_id",
                 session_id: {
-                    $last: "$_id"
+                    $first: "$_id"
                 },
                 type      : {
-                    $last: "$type"
+                    $first: "$type"
                 },
                 unread    : {
                     $sum: 1
                 },
                 username  : {
-                    $last: "$username"
+                    $first: "$username"
                 },
                 content   : {
-                    $last: "$content"
+                    $first: "$content"
                 },
                 created   : {
-                    $last: "$created"
+                    $first: "$created"
                 }
             }
         }, {
             $sort: {
-                _id: -1
+                created: -1
             }
         }, {
             $limit: content.content.limit || 15
