@@ -1,6 +1,8 @@
 var mongoose = require("mongoose");
 var session = require("../session/memory");
 var message = require("../schema/message");
+var config = require("../library/config").load("server.json");
+var request = require("request");
 var event_emitter = require("events").EventEmitter;
 
 var event = new event_emitter();
@@ -63,8 +65,6 @@ event.on("chat", function (connection, content) {
     (new message(content)).save(function (err) {
         if (err == null) {
             if (!session.alive(content.target)) {
-                // TODO 推送模板消息
-
                 connection.send(JSON.stringify({
                     logic_id: "cache_success",
                     username: "系统消息",
@@ -75,6 +75,22 @@ event.on("chat", function (connection, content) {
                     type    : "text",
                     content : "消息缓存成功"
                 }));
+                request({
+                    headers: {
+                        'cache-control': 'no-cache'
+                    },
+                    method : 'GET',
+                    url    : config.notice_server,
+                    qs     : {
+                        open_id: content.target,
+                        content: content.content
+                    }
+                }, function (error, response) {
+                    if (error || response.statusCode !== 200) {
+                        console.log('微信推送提醒失败: ' + JSON.stringify(content));
+                        console.log(error);
+                    }
+                });
             }
         } else {
             connection.send(JSON.stringify({
