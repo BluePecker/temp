@@ -171,7 +171,7 @@ event.on("history", function (connection, content) {
  *      logic_id: "read",
  *      username: "舒超",
  *      from    : "586b033825942d0c496b8152",
- *      target  : "system",
+ *      target  : "586b06fe25942d0c496b81cc",
  *      content : "标记已读",
  *      type    : "text"
  *  }
