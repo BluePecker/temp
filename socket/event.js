@@ -303,33 +303,29 @@ event.on("session", function (connection, content) {
             $group: {
                 _id       : "$session_id",
                 session_id: {
-                    $first: "$_id"
+                    $last: "$_id"
                 },
                 from      : {
-                    $first: "$from"
+                    $last: "$from"
                 },
                 target    : {
-                    $first: "$target"
+                    $last: "$target"
                 },
                 type      : {
-                    $first: "$type"
+                    $last: "$type"
                 },
                 unread    : {
                     $sum: 1
                 },
                 username  : {
-                    $first: "$username"
+                    $last: "$username"
                 },
                 content   : {
                     $last: "$content"
                 },
                 created   : {
-                    $first: "$created"
+                    $last: "$created"
                 }
-            }
-        }, {
-            $sort: {
-                created: 1
             }
         }, {
             $limit: content.content.limit || 15
