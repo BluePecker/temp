@@ -329,8 +329,6 @@ event.on("session", function (connection, content) {
         ]).exec(function (err, docs) {
             if (err == null) {
                 docs = JSON.parse(JSON.stringify(docs));
-                console.log(match);
-                console.log(docs);
                 connection.send(JSON.stringify({
                     logic_id: "session_success",
                     username: "系统消息",
@@ -404,8 +402,6 @@ event.on("session", function (connection, content) {
                 ]).exec(function (err, docs) {
                     if (err == null) {
                         docs = JSON.parse(JSON.stringify(docs));
-                        console.log(match);
-                        console.log(docs);
                         connection.send(JSON.stringify({
                             logic_id: "session_success",
                             username: "系统消息",
