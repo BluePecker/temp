@@ -63,6 +63,8 @@ event.on("chat", function (connection, content) {
     (new message(content)).save(function (err) {
         if (err == null) {
             if (!session.alive(content.target)) {
+                // TODO 推送模板消息
+
                 connection.send(JSON.stringify({
                     logic_id: "cache_success",
                     username: "系统消息",
@@ -272,23 +274,26 @@ event.on("session", function (connection, content) {
             }
         }, {
             $group: {
-                _id     : {
+                _id       : {
                     from  : "$from",
                     target: "$target"
                 },
-                type    : {
+                session_id: {
+                    $first: "$_id"
+                },
+                type      : {
                     $first: "$type"
                 },
-                unread  : {
+                unread    : {
                     $sum: 1
                 },
-                username: {
+                username  : {
                     $first: "$username"
                 },
-                content : {
+                content   : {
                     $first: "$content"
                 },
-                created : {
+                created   : {
                     $first: "$created"
                 }
             }
