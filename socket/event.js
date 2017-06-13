@@ -59,7 +59,7 @@ event.on("chat", function (connection, content) {
             read    : false,
             time    : (new Date()).getTime(),
             type    : "text",
-            content : "消息发送成功"
+            content : content.content
         }));
     }
     (new message(content)).save(function (err) {
@@ -73,7 +73,7 @@ event.on("chat", function (connection, content) {
                     read    : false,
                     time    : (new Date()).getTime(),
                     type    : "text",
-                    content : "消息缓存成功"
+                    content : content.content
                 }));
                 request.post({
                     headers: {
@@ -301,22 +301,22 @@ event.on("session", function (connection, content) {
                     target: "$target"
                 },
                 session_id: {
-                    $first: "$_id"
+                    $last: "$_id"
                 },
                 type      : {
-                    $first: "$type"
+                    $last: "$type"
                 },
                 unread    : {
                     $sum: 1
                 },
                 username  : {
-                    $first: "$username"
+                    $last: "$username"
                 },
                 content   : {
-                    $first: "$content"
+                    $last: "$content"
                 },
                 created   : {
-                    $first: "$created"
+                    $last: "$created"
                 }
             }
         }, {
