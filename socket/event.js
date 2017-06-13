@@ -328,6 +328,10 @@ event.on("session", function (connection, content) {
                 }
             }
         }, {
+            $sort: {
+                created: -1
+            }
+        }, {
             $limit: content.content.limit || 15
         }
     ]).exec(function (err, docs) {
