@@ -291,10 +291,6 @@ event.on("session", function (connection, content) {
         {
             $match: match
         }, {
-            $sort: {
-                _id: -1
-            }
-        }, {
             $group: {
                 _id       : {
                     from  : "$from",
@@ -318,6 +314,10 @@ event.on("session", function (connection, content) {
                 created   : {
                     $last: "$created"
                 }
+            }
+        }, {
+            $sort: {
+                _id: -1
             }
         }, {
             $limit: content.content.limit || 15
