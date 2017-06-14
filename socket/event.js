@@ -160,6 +160,8 @@ event.on("history", function (connection, content) {
         message.find(query).select("_id username from target content type created").sort({
             _id: -1
         }).limit(limit).exec(function (err, docs) {
+            console.log(docs);
+            console.log(JSON.stringify(docs));
             if (err != null) {
                 connection.send(JSON.stringify({
                     logic_id: "history_error",
