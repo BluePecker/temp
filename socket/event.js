@@ -96,11 +96,9 @@ event.on("chat", function (connection, content) {
                         openId : content.target,
                         content: content.content
                     })
-                }, function (error, response, json) {
-                    console.log(error);
-                    console.log(response.statusCode);
+                }, function (error, response) {
                     if (!error && response.statusCode === 200) {
-                        console.log('成功推送微信提醒: ' + json);
+                        console.log('成功推送微信提醒至doctor-x-server');
                     } else {
                         console.log('微信推送提醒失败: ' + JSON.stringify(content));
                         console.log(error);
