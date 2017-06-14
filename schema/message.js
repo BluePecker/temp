@@ -11,10 +11,7 @@ module.exports = mongoose.model("message", new mongoose.Schema({
     content    : String,
     type       : String,
     session_id : String,
-    extra_info : {
-        mpOpenId : String,
-        wxUnionID: String
-    },
+    extra_info : Object,
     read       : {
         type   : Boolean,
         default: false
