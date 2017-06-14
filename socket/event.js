@@ -185,7 +185,7 @@ event.on("history", function (connection, content) {
                 target  : content.from,
                 read    : false,
                 time    : (new Date()).getTime(),
-                content : docs,
+                content : JSON.stringify(docs),
                 type    : "array"
             }));
         });
