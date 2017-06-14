@@ -172,6 +172,7 @@ event.on("history", function (connection, content) {
                 }));
                 return false;
             }
+            console.log(JSON.stringify(docs));
             //docs = JSON.parse(JSON.stringify(docs)).map(function (item) {
             //    item.time = (new Date(item.created)).getTime();
             //    delete item.created;
