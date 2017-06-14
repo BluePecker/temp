@@ -172,11 +172,11 @@ event.on("history", function (connection, content) {
                 }));
                 return false;
             }
-            docs = JSON.parse(JSON.stringify(docs)).map(function (item) {
-                item.time = (new Date(item.created)).getTime();
-                delete item.created;
-                return item;
-            });
+            //docs = JSON.parse(JSON.stringify(docs)).map(function (item) {
+            //    item.time = (new Date(item.created)).getTime();
+            //    delete item.created;
+            //    return item;
+            //});
             connection.send(JSON.stringify({
                 logic_id: "history_success",
                 username: "系统消息",
