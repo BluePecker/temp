@@ -215,6 +215,7 @@ event.on("read", function (connection, content) {
     }, {
         multi: true
     }, function (err, rows) {
+        console.log(rows);
         if (err == null) {
             connection.send(JSON.stringify({
                 logic_id: "read_success",
