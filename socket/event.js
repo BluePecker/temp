@@ -157,9 +157,9 @@ event.on("history", function (connection, content) {
 
         var limit = content.content.limit == undefined || content.content.limit <= 0 ? 15 : content.content.limit;
         console.log(query);
-        message.find(query).sort({
+        message.find(query).select("_id username from target content type created").sort({
             _id: -1
-        }).limit(limit).select("_id username from target content type created").exec(function (err, docs) {
+        }).limit(limit).exec(function (err, docs) {
             if (err != null) {
                 connection.send(JSON.stringify({
                     logic_id: "history_error",
