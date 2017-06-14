@@ -97,11 +97,11 @@ event.on("chat", function (connection, content) {
                         content: content.content
                     })
                 }, function (error, response, json) {
-                    if (error || response.statusCode !== 200) {
+                    if (!error && response.statusCode === 200) {
+                        console.log('成功推送微信提醒: ' + json);
+                    } else {
                         console.log('微信推送提醒失败: ' + JSON.stringify(content));
                         console.log(error);
-                    } else {
-                        console.log('成功推送微信提醒: ' + json);
                     }
                 });
             }
