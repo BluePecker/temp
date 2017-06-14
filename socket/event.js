@@ -87,14 +87,17 @@ event.on("chat", function (connection, content) {
                     type    : "text",
                     content : content.content
                 }));
+                (content.extra_info == undefined) && (content.extra_info = {});
                 request.post({
                     headers: {
                         'content-type': 'application/json'
                     },
                     url    : config.notice_server,
                     body   : JSON.stringify({
-                        openId : content.target,
-                        content: content.content
+                        mpOpenId : content.extra_info.mpOpenId || '',
+                        xcxOpenId: content.target,
+                        content  : content.content || '',
+                        wxUnionID: content.extra_info.wxUnionID || ''
                     })
                 }, function (error, response) {
                     if (!error && response.statusCode === 200) {
@@ -156,7 +159,7 @@ event.on("history", function (connection, content) {
         }
 
         var limit = content.content.limit == undefined || content.content.limit <= 0 ? 15 : content.content.limit;
-        message.find(query).select("_id username from target content type created").sort({
+        message.find(query).select("_id username from target content extra_info type created").sort({
             _id: -1
         }).limit(limit).exec(function (err, docs) {
             if (err != null) {
