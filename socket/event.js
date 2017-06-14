@@ -172,6 +172,11 @@ event.on("history", function (connection, content) {
                 }));
                 return false;
             }
+            docs = JSON.parse(JSON.stringify(docs)).map(function (item) {
+                item.time = (new Date(item.created)).getTime();
+                delete item.created;
+                return item;
+            });
             connection.send(JSON.stringify({
                 logic_id: "history_success",
                 username: "系统消息",
@@ -179,8 +184,8 @@ event.on("history", function (connection, content) {
                 target  : content.from,
                 read    : false,
                 time    : (new Date()).getTime(),
-                content : JSON.stringify(docs),
-                type    : "json"
+                content : docs,
+                type    : "array"
             }));
         });
     }
