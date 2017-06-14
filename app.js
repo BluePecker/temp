@@ -50,8 +50,8 @@ wss.on("connection", function (connection) {
     });
 
     connection.on("close", function (socket) {
-        console.log("关闭链接: " + socket);
-        session.del(connection.name);
+        console.log("关闭链接: " + socket + " " + connection.from);
+        session.del(connection.from);
     });
 });
 
