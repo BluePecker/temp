@@ -101,7 +101,7 @@ event.on("chat", function (connection, content) {
                         console.log('微信推送提醒失败: ' + JSON.stringify(content));
                         console.log(error);
                     } else {
-                        console.log('成功推送微信提醒: ' + JSON.stringify(json));
+                        console.log('成功推送微信提醒: ' + json);
                     }
                 });
             }
@@ -219,7 +219,7 @@ event.on("read", function (connection, content) {
         modified: new Date()
     }, {
         multi: true
-    }, function (err, raw) {
+    }, function (err, rows) {
         if (err == null) {
             connection.send(JSON.stringify({
                 logic_id: "read_success",
@@ -228,7 +228,7 @@ event.on("read", function (connection, content) {
                 target  : content.from,
                 read    : false,
                 time    : (new Date()).getTime(),
-                content : "成功将" + raw + "条消息置为已读",
+                content : "成功将" + rows.length + "条消息置为已读",
                 type    : "text"
             }));
         } else {
