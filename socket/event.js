@@ -208,14 +208,14 @@ event.on("read", function (connection, content) {
             $lte: new Date()
         },
         from   : content.target,
-        target : content.from
+        target : content.from,
+        read   : false
     }, {
         read    : true,
         modified: new Date()
     }, {
         multi: true
     }, function (err, rows) {
-        console.log(rows);
         if (err == null) {
             connection.send(JSON.stringify({
                 logic_id: "read_success",
@@ -224,7 +224,7 @@ event.on("read", function (connection, content) {
                 target  : content.from,
                 read    : false,
                 time    : (new Date()).getTime(),
-                content : "成功将" + rows.length + "条消息置为已读",
+                content : "成功将" + rows.nModified + "条消息置为已读",
                 type    : "text"
             }));
         } else {
