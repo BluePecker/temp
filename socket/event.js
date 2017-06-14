@@ -156,12 +156,9 @@ event.on("history", function (connection, content) {
         }
 
         var limit = content.content.limit == undefined || content.content.limit <= 0 ? 15 : content.content.limit;
-        console.log(query);
         message.find(query).select("_id username from target content type created").sort({
             _id: -1
         }).limit(limit).exec(function (err, docs) {
-            console.log(docs);
-            console.log(JSON.stringify(docs));
             if (err != null) {
                 connection.send(JSON.stringify({
                     logic_id: "history_error",
@@ -175,17 +172,10 @@ event.on("history", function (connection, content) {
                 }));
                 return false;
             }
-            var list = [];
-            docs.forEach(function (msg) {
-                list.push({
-                    _id     : msg._id,
-                    username: msg.username,
-                    from    : msg.from,
-                    target  : msg.target,
-                    content : msg.content,
-                    type    : msg.type,
-                    time    : (new Date(msg.created)).getTime()
-                });
+            docs = JSON.parse(JSON.stringify(docs)).map(function (item) {
+                item.time = (new Date(msg.created)).getTime();
+                delete item.created;
+                return item;
             });
             connection.send(JSON.stringify({
                 logic_id: "history_success",
@@ -194,7 +184,7 @@ event.on("history", function (connection, content) {
                 target  : content.from,
                 read    : false,
                 time    : (new Date()).getTime(),
-                content : list,
+                content : docs,
                 type    : "array"
             }));
         });
