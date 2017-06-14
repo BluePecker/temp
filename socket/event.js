@@ -173,7 +173,7 @@ event.on("history", function (connection, content) {
                 return false;
             }
             docs = JSON.parse(JSON.stringify(docs)).map(function (item) {
-                item.time = (new Date(msg.created)).getTime();
+                item.time = (new Date(item.created)).getTime();
                 delete item.created;
                 return item;
             });
