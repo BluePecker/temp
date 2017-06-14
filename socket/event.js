@@ -304,6 +304,9 @@ event.on("session", function (connection, content) {
         target_name: {
             $last: "$target_name"
         },
+        extra_info: {
+            $last: "extra_info"
+        },
         content    : {
             $last: "$content"
         },
