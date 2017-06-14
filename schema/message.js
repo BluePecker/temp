@@ -11,7 +11,7 @@ module.exports = mongoose.model("message", new mongoose.Schema({
     content    : String,
     type       : String,
     session_id : String,
-    extra_info : Object,
+    ext_info   : Object,
     read       : {
         type   : Boolean,
         default: false
