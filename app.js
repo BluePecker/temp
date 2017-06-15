@@ -53,24 +53,6 @@ wss.on("connection", function (connection) {
         console.log("关闭链接: " + socket + " " + connection.from);
         session.del(connection.from);
     });
-
-    connection.on("pong", function () {
-        connection.send(JSON.stringify({
-            logic_id: "heartbeat",
-            username: "系统消息",
-            from    : "system",
-            target  : "",
-            read    : false,
-            time    : (new Date()).getTime(),
-            content : "heartbeat",
-            type    : "text"
-        }));
-        console.log("sssssss");
-    });
-
-    connection.interval = setInterval(function () {
-        connection.ping("", false, true);
-    }, 2000);
 });
 
 function validator(content) {
