@@ -54,9 +54,9 @@ wss.on("connection", function (connection) {
         session.del(connection.from);
     });
 
-    connection.interval = setInterval(function () {
-        connection.terminate();
-    }, 5000);
+    //connection.interval = setInterval(function () {
+    //    connection.terminate();
+    //}, 5000);
 });
 
 function validator(content) {
