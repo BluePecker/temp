@@ -54,11 +54,17 @@ wss.on("connection", function (connection) {
         session.del(connection.from);
     });
 
-
-    connection.on("onclose", function () {
-        console.log("xxx");
-    });
     connection.on("pong", function () {
+        connection.send(JSON.stringify({
+            logic_id: "heartbeat",
+            username: "系统消息",
+            from    : "system",
+            target  : "",
+            read    : false,
+            time    : (new Date()).getTime(),
+            content : "heartbeat",
+            type    : "text"
+        }));
         console.log("sssssss");
     });
 
