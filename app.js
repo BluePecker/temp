@@ -55,9 +55,10 @@ wss.on("connection", function (connection) {
     });
 
     connection.interval = setInterval(function () {
-        console.log("interval");
-        console.log(connection.from);
-    }, 2000);
+        connection.is_alive = connection.is_alive === undefined;
+        connection.ping("", false, true);
+        console.log(connection.from + " : " + connection.is_alive);
+    }, 5000);
 });
 
 function validator(content) {
