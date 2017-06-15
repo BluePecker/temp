@@ -56,7 +56,7 @@ wss.on("connection", function (connection) {
 
     connection.interval = setInterval(function () {
         console.log("interval");
-        console.log(this.from);
+        console.log(connection.from);
     }, 2000);
 });
 
