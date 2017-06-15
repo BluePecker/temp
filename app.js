@@ -55,6 +55,9 @@ wss.on("connection", function (connection) {
     });
 
 
+    connection.on("onclose", function () {
+        console.log("xxx");
+    });
     connection.on("pong", function () {
         console.log("sssssss");
     });
