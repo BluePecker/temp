@@ -53,6 +53,11 @@ wss.on("connection", function (connection) {
         console.log("关闭链接: " + socket + " " + connection.from);
         session.del(connection.from);
     });
+
+    connection.interval = setInterval(function () {
+        console.log("interval");
+        console.log(this.from);
+    }, 2000);
 });
 
 function validator(content) {
