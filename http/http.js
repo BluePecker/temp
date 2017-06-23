@@ -48,22 +48,29 @@ http.post("/pay/notice", function (req, res) {
                         if (session.alive(params.notice.target)) {
                             session.get(params.target).send(JSON.stringify(params.notice));
                         } else {
-                            // todo send notice
                             request.post({
                                 headers: {
                                     'content-type': 'application/json'
                                 },
                                 url    : config.notice_server,
+                                // todo send some params
                                 body   : JSON.stringify({})
-                            }, function (err, response) {
-
+                            }, function (error, response) {
+                                if (!error && response.statusCode === 200) {
+                                    console.log('成功推送支付成功提醒至doctor-x-server');
+                                } else {
+                                    console.log('微信推送支付成功提醒失败: ' + JSON.stringify(content));
+                                    console.log(error);
+                                }
                             });
                         }
                     } else {
+                        console.log(err);
                         res.send("NO");
                     }
                 })
             } else {
+                console.log(err);
                 res.send("NO");
             }
         }));
