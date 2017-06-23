@@ -60,8 +60,7 @@ event.on("chat", function (connection, content) {
     content.time = (new Date()).getTime();
 
     (new message(content)).save(function (err, doc) {
-        console.log(doc);
-        console.log(doc._id);
+        content._id = doc._id;
         if (err == null) {
             if (!session.alive(content.target)) {
                 connection.send(JSON.stringify({
@@ -303,7 +302,7 @@ event.on("session", function (connection, content) {
         target_name: {
             $last: "$target_name"
         },
-        ext_info: {
+        ext_info   : {
             $last: "$ext_info"
         },
         content    : {
