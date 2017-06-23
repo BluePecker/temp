@@ -66,8 +66,8 @@ event.on("chat", function (connection, content) {
     content.time = (new Date()).getTime();
 
     (new message(content)).save(function (err, doc) {
-        content._id = doc._id;
         if (err == null) {
+            content._id = doc._id;
             // 感觉由chat转发不合适
             if (content.type == "pay") {
                 request.post({
