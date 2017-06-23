@@ -83,7 +83,7 @@ event.on("chat", function (connection, content) {
                         userId   : content.target,
                         mpOpenId : content.ext_info.mpOpenId || '',
                         xcxOpenId: content.target,
-                        content  : content.content || '',
+                        content  : content.content.content || '',
                         wxUnionID: content.ext_info.wxUnionID || ''
                     })
                 }, function (error, response) {
