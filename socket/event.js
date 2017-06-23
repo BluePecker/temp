@@ -77,7 +77,7 @@ event.on("chat", function (connection, content) {
                     url    : config.doctor_x_api + "/user/createPay",
                     body   : JSON.stringify({
                         kfId     : content.from,
-                        matter   : content.content.metter || '',
+                        matter   : content.content.matter || '',
                         money    : content.content.money || 0,
                         msgId    : content._id,
                         userId   : content.target,
