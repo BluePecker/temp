@@ -58,18 +58,22 @@ http.post("/pay/notice", function (req, res) {
                             }, function (error, response) {
                                 if (!error && response.statusCode === 200) {
                                     console.log('成功推送支付成功提醒至doctor-x-server');
+                                    res.send("YES");
                                 } else {
                                     console.log('微信推送支付成功提醒失败: ' + JSON.stringify(content));
                                     console.log(error);
+                                    res.send("NO");
                                 }
                             });
                         }
                     } else {
+                        console.log("更新支付记录失败");
                         console.log(err);
                         res.send("NO");
                     }
                 })
             } else {
+                console.log("保存付款通知消息失败");
                 console.log(err);
                 res.send("NO");
             }
