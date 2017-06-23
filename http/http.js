@@ -12,62 +12,66 @@ http.use(parser.urlencoded({
     extended: true
 }));
 
-http.get("/push", function (req, res) {
-    var params = req.body;
+http.post("/pay/notice", function (req, res) {
+    var params = {
+        message_id: req.body.message_id,
+        notice    : req.body.notice
+    };
 
-    var check_property = true;
-    var property = ['from', 'username', 'target', 'target_name', 'ext_info', 'type', 'content'];
-    property.forEach(function (item) {
-        !params.hasOwnProperty(item) && (check_property = false);
+    var notice_has_field = true;
+    var notice_field = ['from', 'username', 'target', 'target_name', 'ext_info', 'type', 'content'];
+    notice_field.forEach(function (item) {
+        !params.notice.hasOwnProperty(item) && (notice_has_field = false);
     });
 
-    if (check_property) {
+    if (notice_has_field) {
         var content = {
             logic_id   : "chat",
-            username   : params.username,
-            from       : params.from,
-            target     : params.target,
-            target_name: params.target_name,
-            content    : params.content,
-            type       : params.type,
-            ext_info   : params.ext_info
+            from       : params.notice.from,
+            username   : params.notice.username,
+            target     : params.notice.target,
+            target_name: params.notice.target_name,
+            type       : params.notice.type,
+            content    : params.notice.content,
+            ext_info   : params.notice.ext_info
         };
 
-        (new message(content)).save(function (err) {
-            if (err == null) {
-                // todo 根据消息类型去更新历史支付记录
-                if (session.alive(params.target)) {
-                    session.get(params.target).send(JSON.stringify(content));
-                } else {
-                    request.post({
-                        headers: {
-                            'content-type': 'application/json'
-                        },
-                        url    : config.notice_server,
-                        body   : JSON.stringify({
-                            mpOpenId : content.ext_info.mpOpenId || '',
-                            xcxOpenId: content.target,
-                            type     : content.type,
-                            content  : content.content || '',
-                            wxUnionID: content.ext_info.wxUnionID || ''
-                        })
-                    }, function (error, response) {
-                        if (!error && response.statusCode === 200) {
-                            console.log('成功推送微信提醒至doctor-x-server');
+        (new message(content).save(function (err) {
+            if (!err) {
+                (new message).update(params.message_id, {
+                    $set: {
+                        "modified"      : new Date(),
+                        "content.status": "done"
+                    }
+                }, function (err) {
+                    if (!err) {
+                        if (session.alive(params.notice.target)) {
+                            session.get(params.target).send(JSON.stringify(params.notice));
                         } else {
-                            console.log('微信推送提醒失败: ' + JSON.stringify(content));
-                            console.log(error);
+                            // todo send notice
+                            request.post({
+                                headers: {
+                                    'content-type': 'application/json'
+                                },
+                                url    : config.notice_server,
+                                body   : JSON.stringify({})
+                            }, function (err, response) {
+
+                            });
                         }
-                    });
-                }
+                    } else {
+                        res.send("NO");
+                    }
+                })
             } else {
-                console.log(err);
+                res.send("NO");
             }
-        });
-        res.send("OK");
-    } else {
-        res.send("NO");
+        }));
     }
+});
+
+http.get("/push", function (req, res) {
+    // todo send push
 });
 
 module.exports = http;
