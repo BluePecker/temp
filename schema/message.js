@@ -8,7 +8,7 @@ module.exports = mongoose.model("message", new mongoose.Schema({
     from       : String,
     target     : String,
     target_name: String,
-    content    : String,
+    content    : Object,
     type       : String,
     session_id : String,
     ext_info   : Object,
