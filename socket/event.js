@@ -37,12 +37,18 @@ event.on("login", function (connection, content) {
 /**
  * 聊天
  *  {
- *      logic_id: "chat",
- *      username: "舒超",
- *      from    : "586b033825942d0c496b8152",
- *      target  : "586b06fe25942d0c496b81cc",
- *      content : "消息内容",
- *      type    : "text"
+ *      logic_id   : "chat",
+ *      username   : "舒超",
+ *      from       : "586b033825942d0c496b8152",
+ *      target     : "586b06fe25942d0c496b81cc",
+ *      target_name: "袁聿平",
+ *      content    : "消息内容",
+ *      type       : "text"
+ *      ext_info   : {
+ *          xcxOpenId: "",
+ *          mpOpenId : "",
+ *          wxUnionID: ""
+ *      }
  *  }
  */
 event.on("chat", function (connection, content) {
@@ -62,6 +68,35 @@ event.on("chat", function (connection, content) {
     (new message(content)).save(function (err, doc) {
         content._id = doc._id;
         if (err == null) {
+            // 感觉由chat转发不合适
+            if (content.type == "pay") {
+                request.post({
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    url    : config.doctor_x_api + "/user/createPay",
+                    body   : JSON.stringify({
+                        kfId     : content.from,
+                        matter   : content.content.metter || '',
+                        money    : content.content.money || 0,
+                        msgId    : content._id,
+                        userId   : content.target,
+                        mpOpenId : content.ext_info.mpOpenId || '',
+                        xcxOpenId: content.target,
+                        content  : content.content || '',
+                        wxUnionID: content.ext_info.wxUnionID || ''
+                    })
+                }, function (error, response) {
+                    if (!error && response.statusCode === 200) {
+                        console.log('成功调用doctor-x-server创建订单');
+                    } else {
+                        console.log('调用doctor-x-server创建订单失败: ' + JSON.stringify(content));
+                        console.log(error);
+                        message.remove({_id: content._id}, function (err) {});
+                    }
+                });
+            }
+
             if (!session.alive(content.target)) {
                 connection.send(JSON.stringify({
                     logic_id: "cache_success",
@@ -78,7 +113,7 @@ event.on("chat", function (connection, content) {
                     headers: {
                         'content-type': 'application/json'
                     },
-                    url    : config.notice_server,
+                    url    : config.doctor_x_api + "/wechat/msgNotice",
                     body   : JSON.stringify({
                         mpOpenId : content.ext_info.mpOpenId || '',
                         xcxOpenId: content.target,

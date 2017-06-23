@@ -38,7 +38,7 @@ http.post("/pay/notice", function (req, res) {
 
         (new message(content).save(function (err) {
             if (!err) {
-                (new message).update(params.message_id, {
+                message.update(params.message_id, {
                     $set: {
                         "modified"      : new Date(),
                         "content.status": "done"
@@ -52,7 +52,7 @@ http.post("/pay/notice", function (req, res) {
                                 headers: {
                                     'content-type': 'application/json'
                                 },
-                                url    : config.notice_server,
+                                url    : config.doctor_x_api + "/wechat/msgNotice",
                                 // todo send some params
                                 body   : JSON.stringify({})
                             }, function (error, response) {
