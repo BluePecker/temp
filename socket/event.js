@@ -57,24 +57,11 @@ event.on("chat", function (connection, content) {
     hash.update(temp);
 
     content.session_id = hash.digest("hex");
+    content.time = (new Date()).getTime();
 
-    if (session.alive(content.target)) {
-        content.time = (new Date()).getTime();
-        session.get(content.target).send(JSON.stringify(content));
-
-        connection.send(JSON.stringify({
-            logic_id: "send_success",
-            username: "系统消息",
-            from    : "system",
-            target  : content.from,
-            read    : false,
-            time    : (new Date()).getTime(),
-            type    : "text",
-            content : content.content
-        }));
-    }
-
-    (new message(content)).save(function (err) {
+    (new message(content)).save(function (err, doc) {
+        console.log(doc);
+        console.log(doc._id);
         if (err == null) {
             if (!session.alive(content.target)) {
                 connection.send(JSON.stringify({
@@ -107,6 +94,18 @@ event.on("chat", function (connection, content) {
                         console.log(error);
                     }
                 });
+            } else {
+                session.get(content.target).send(JSON.stringify(content));
+                connection.send(JSON.stringify({
+                    logic_id: "send_success",
+                    username: "系统消息",
+                    from    : "system",
+                    target  : content.from,
+                    read    : false,
+                    time    : (new Date()).getTime(),
+                    type    : "text",
+                    content : content.content
+                }));
             }
         } else {
             connection.send(JSON.stringify({
