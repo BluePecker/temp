@@ -48,7 +48,7 @@ http.post("/pay/notice", function (req, res) {
                 }, function (err) {
                     if (!err) {
                         if (session.alive(params.notice.target)) {
-                            session.get(params.target).send(JSON.stringify(params.notice));
+                            session.get(params.notice.target).send(JSON.stringify(params.notice));
                         } else {
                             request.post({
                                 headers: {
