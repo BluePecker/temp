@@ -42,7 +42,9 @@ http.post("/pay/notice", function (req, res) {
             console.log("save");
             console.log(err);
             if (!err) {
-                message.update(params.message_id, {
+                message.update({
+                    _id: params.message_id
+                }, {
                     $set: {
                         "modified"      : new Date(),
                         "content.status": "done"
