@@ -33,7 +33,7 @@ http.post("/pay/notice", function (req, res) {
             target_name: params.notice.target_name,
             type       : params.notice.type,
             content    : params.notice.content,
-            ext_info   : !params.notice.ext_info ? {} : JSON.parse(params.notice.ext_info)
+            ext_info   : !params.notice.ext_info ? {} : params.notice.ext_info
         };
         content.ext_info.message_id = params.message_id;
 
