@@ -15,7 +15,7 @@ http.use(parser.urlencoded({
 http.post("/pay/notice", function (req, res) {
     var params = {
         message_id: req.body.message_id,
-        notice    : req.body.notice
+        notice    : req.body
     };
 
     var notice_has_field = true;
@@ -36,6 +36,7 @@ http.post("/pay/notice", function (req, res) {
             content    : params.notice.content,
             ext_info   : params.notice.ext_info
         };
+        console.log(content);
 
         (new message(content).save(function (err) {
             console.log("save");
