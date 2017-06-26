@@ -24,7 +24,6 @@ http.post("/pay/notice", function (req, res) {
         (!params.notice || !params.notice.hasOwnProperty(item)) && (notice_has_field = false);
     });
 
-    console.log(notice_has_field);
     if (notice_has_field) {
         var content = {
             logic_id   : "chat",
@@ -34,13 +33,10 @@ http.post("/pay/notice", function (req, res) {
             target_name: params.notice.target_name,
             type       : params.notice.type,
             content    : params.notice.content,
-            ext_info   : params.notice.ext_info
+            ext_info   : !params.notice.ext_info ? '' : JSON.parse(params.notice.ext_info)
         };
-        console.log(content);
 
         (new message(content).save(function (err) {
-            console.log("save");
-            console.log(err);
             if (!err) {
                 message.update({
                     _id: params.message_id
@@ -50,8 +46,6 @@ http.post("/pay/notice", function (req, res) {
                         "content.status": "done"
                     }
                 }, function (err) {
-                    console.log("update");
-                    console.log(err);
                     if (!err) {
                         if (session.alive(params.notice.target)) {
                             session.get(params.target).send(JSON.stringify(params.notice));
