@@ -53,8 +53,12 @@ http.post("/pay/notice", function (req, res) {
                                     'content-type': 'application/json'
                                 },
                                 url    : config.doctor_x_api + "/wechat/msgNotice",
-                                // todo send some params
-                                body   : JSON.stringify({})
+                                body   : JSON.stringify({
+                                    mpOpenId : content.ext_info.mpOpenId || '',
+                                    xcxOpenId: content.target,
+                                    content  : content.content || '',
+                                    wxUnionID: content.ext_info.wxUnionID || ''
+                                })
                             }, function (error, response) {
                                 if (!error && response.statusCode === 200) {
                                     console.log('成功推送支付成功提醒至doctor-x-server');
