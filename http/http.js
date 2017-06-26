@@ -37,6 +37,8 @@ http.post("/pay/notice", function (req, res) {
         };
         content.ext_info.message_id = params.message_id;
 
+        console.log(content);
+
         (new message(content).save(function (err) {
             if (!err) {
                 message.update({
