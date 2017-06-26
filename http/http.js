@@ -66,7 +66,7 @@ http.post("/pay/notice", function (req, res) {
                                 url    : config.doctor_x_api + "/wechat/msgNotice",
                                 body   : JSON.stringify({
                                     mpOpenId : content.ext_info.mpOpenId || '',
-                                    xcxOpenId: content.target,
+                                    xcxOpenId: content.ext_info.userId || '',
                                     content  : content.content || '',
                                     wxUnionID: content.ext_info.wxUnionID || ''
                                 })
