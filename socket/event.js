@@ -80,9 +80,9 @@ event.on("chat", function (connection, content) {
                         matter   : content.content.matter || '',
                         money    : content.content.money || 0,
                         msgId    : content._id,
-                        userId   : content.target,
                         mpOpenId : content.ext_info.mpOpenId || '',
                         xcxOpenId: content.target,
+                        userId   : content.ext_info.userId || '',
                         content  : content.content.content || '',
                         wxUnionID: content.ext_info.wxUnionID || ''
                     })
