@@ -82,6 +82,8 @@ http.post("/pay/notice", function (req, res) {
                 res.send("NO");
             }
         }));
+    } else {
+        res.send("NO");
     }
 });
 
