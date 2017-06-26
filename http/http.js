@@ -52,8 +52,12 @@ http.post("/pay/notice", function (req, res) {
                     if (!err) {
                         if (session.alive(params.notice.target)) {
                             var connection = session.get(params.notice.target);
-                            connection != undefined && connection.send(JSON.stringify(params.notice));
-                            res.send("OK");
+                            if (connection != undefined) {
+                                connection.send(JSON.stringify(params.notice));
+                                res.send("YES");
+                            } else {
+                                res.send("NO");
+                            }
                         } else {
                             request.post({
                                 headers: {
