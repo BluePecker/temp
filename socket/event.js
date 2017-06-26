@@ -116,7 +116,7 @@ event.on("chat", function (connection, content) {
                     url    : config.doctor_x_api + "/wechat/msgNotice",
                     body   : JSON.stringify({
                         mpOpenId : content.ext_info.mpOpenId || '',
-                        xcxOpenId: content.ext_info.userId || '',
+                        xcxOpenId: content.ext_info.xcxOpenId || '',
                         content  : content.content || '',
                         wxUnionID: content.ext_info.wxUnionID || ''
                     })
