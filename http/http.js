@@ -21,7 +21,7 @@ http.post("/pay/notice", function (req, res) {
     var notice_has_field = true;
     var notice_field = ['from', 'username', 'target', 'target_name', 'ext_info', 'type', 'content'];
     notice_field.forEach(function (item) {
-        !params.notice.hasOwnProperty(item) && (notice_has_field = false);
+        (!params.notice || !params.notice.hasOwnProperty(item)) && (notice_has_field = false);
     });
 
     if (notice_has_field) {
